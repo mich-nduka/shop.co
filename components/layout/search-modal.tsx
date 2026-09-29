@@ -78,7 +78,7 @@ export default function SearchModal({ isOpen, onClose, products }: SearchModalPr
 								className="flex items-center gap-4 py-3 px-2 rounded-lg hover:bg-neutral-50 transition-colors"
 							>
 								<img
-									src={product.images?.[0] || product.thumbnail || "/placeholder.svg"}
+									src={product.thumbnail || product.images?.[0] || "/placeholder.svg"}
 									alt={product.title}
 									className="w-14 h-14 object-cover rounded bg-neutral-100 shrink-0"
 								/>

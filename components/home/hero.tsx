@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 
 export default function Hero() {
 	return (
@@ -52,21 +53,29 @@ export default function Hero() {
 
 				{/* Image Content with decorative stars */}
 				<div className="flex-1 relative w-full flex justify-center items-end self-end">
-					<img
-						src="/hero-img-2.png"
+					<Image
+						src="/hero-img-2.webp"
 						alt="Fashion models showcasing clothes"
-						className="w-full max-w-[550px] object-contain relative z-10"
+						width={550}
+						height={489}
+						priority
+						sizes="(max-width: 768px) 100vw, 550px"
+						className="w-full max-w-[550px] h-auto object-contain relative z-10"
 					/>
-					<img
+					<Image
 						src="/lg-star.png"
 						alt=""
 						aria-hidden="true"
+						width={96}
+						height={96}
 						className="absolute top-6 right-6 sm:right-12 w-16 sm:w-24 h-16 sm:h-24 z-20 pointer-events-none"
 					/>
-					<img
+					<Image
 						src="/sm-star.png"
 						alt=""
 						aria-hidden="true"
+						width={56}
+						height={56}
 						className="absolute top-1/3 left-4 sm:left-8 w-10 sm:w-14 h-10 sm:h-14 z-20 pointer-events-none"
 					/>
 				</div>

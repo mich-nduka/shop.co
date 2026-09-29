@@ -2,20 +2,23 @@ import { Category, Product, ProductsApiResponse, Brand } from "~/types"
 
 const BASE_URL = "https://dummyjson.com"
 
-if (typeof window === "undefined") {
-  // Ensure Node.js prioritizes IPv4 to avoid IPv6 connection timeouts on systems without IPv6 internet routing
-  import("node:dns")
-    .then((dns) => {
-      dns.setDefaultResultOrder?.("ipv4first")
-    })
-    .catch(() => {})
-}
+import dns from "node:dns"
+
+try {
+  dns.setDefaultResultOrder("ipv4first")
+} catch {}
 
 /**
  * Fetch wrapper with timeout and retry logic for transient socket drops/timeouts
  */
 async function fetchWithRetry(url: string, init?: RequestInit, maxRetries = 2): Promise<Response> {
   let attempt = 0
+  const headers = {
+    "User-Agent": "ShopCo-App/1.0 (Next.js)",
+    Accept: "application/json",
+    ...init?.headers
+  }
+
   while (attempt <= maxRetries) {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 8000)
@@ -23,6 +26,7 @@ async function fetchWithRetry(url: string, init?: RequestInit, maxRetries = 2): 
     try {
       const res = await fetch(url, {
         ...init,
+        headers,
         signal: init?.signal || controller.signal
       })
       clearTimeout(timeoutId)
@@ -31,15 +35,17 @@ async function fetchWithRetry(url: string, init?: RequestInit, maxRetries = 2): 
       clearTimeout(timeoutId)
       attempt++
 
-      const isTimeoutOrSocketError =
+      const isRetryable =
         err?.name === "AbortError" ||
         err?.name === "TimeoutError" ||
+        err?.name === "TypeError" ||
         err?.code === "UND_ERR_CONNECT_TIMEOUT" ||
         err?.cause?.code === "UND_ERR_CONNECT_TIMEOUT" ||
         err?.cause?.code === "ETIMEDOUT" ||
-        err?.cause?.code === "ECONNRESET"
+        err?.cause?.code === "ECONNRESET" ||
+        err?.cause?.name === "ConnectTimeoutError"
 
-      if (attempt > maxRetries || !isTimeoutOrSocketError) {
+      if (attempt > maxRetries || !isRetryable) {
         throw err
       }
 

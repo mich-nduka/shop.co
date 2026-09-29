@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Star } from "lucide-react"
 import type { Product } from "~/types"
 
@@ -18,11 +19,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 			className="group flex flex-col gap-2 font-[family-name:var(--font-satoshi)] w-[200px] sm:w-[240px] md:w-[280px] shrink-0 no-underline text-inherit"
 		>
 			<div className="w-full aspect-square bg-[#f0eeed] rounded-[20px] overflow-hidden relative flex items-center justify-center">
-				<img
-					src={product.images?.[0] || product.thumbnail || "/placeholder.svg"}
+				<Image
+					src={product.thumbnail || product.images?.[0] || "/placeholder.svg"}
 					alt={product.title}
-					className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-					loading="lazy"
+					fill
+					sizes="(max-width: 640px) 200px, (max-width: 768px) 240px, 280px"
+					className="object-cover group-hover:scale-105 transition-transform duration-300"
 				/>
 			</div>
 

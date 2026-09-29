@@ -140,7 +140,7 @@ export default function Navbar({ allProducts = [] }: { allProducts?: Product[] }
 										className="flex items-center gap-3 p-2.5 hover:bg-neutral-50 rounded-lg transition-colors"
 									>
 										<img
-											src={product.images?.[0] || product.thumbnail || "/placeholder.svg"}
+											src={product.thumbnail || product.images?.[0] || "/placeholder.svg"}
 											alt={product.title}
 											className="w-12 h-12 object-cover rounded bg-neutral-100 shrink-0"
 										/>

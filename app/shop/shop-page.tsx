@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Category } from "~/types"
 import { Breadcrumb } from "~/components/ui"
 
@@ -27,11 +28,12 @@ export default function ShopPage({
 							prefetch={false}
 							className="group relative aspect-square rounded-2xl overflow-hidden shadow-sm bg-neutral-100 hover:shadow-md transition-all"
 						>
-							<img
+							<Image
 								src={thumbnail}
 								alt={category.name}
-								className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-								loading="lazy"
+								fill
+								sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+								className="object-cover group-hover:scale-105 transition-transform duration-300"
 							/>
 							<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-6">
 								<h2 className="text-white text-xl sm:text-2xl font-bold capitalize">

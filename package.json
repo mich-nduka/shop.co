@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
-    "start": "next start",
+    "build": "NODE_OPTIONS='--dns-result-order=ipv4first' next build",
+    "dev": "NODE_OPTIONS='--dns-result-order=ipv4first' next dev",
+    "start": "NODE_OPTIONS='--dns-result-order=ipv4first' next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
@@ -19,6 +19,7 @@
     "next": "^16.3.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "sharp": "^0.35.5",
     "swiper": "^11.2.5",
     "swr": "^2.3.2",
     "tailwindcss": "^4.3.3"
