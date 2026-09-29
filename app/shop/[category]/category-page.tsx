@@ -1,251 +1,159 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import styled from "styled-components"
+import { Category, Product } from "~/types"
 import ProductCard from "~/components/product-card"
 import Breadcrumb from "~/components/breadcrumb"
-
-import { Category, Product } from "~/types"
 import { DesktopNav, MobileNav } from "~/components/category-navigation-menu"
-import { usePathname } from "next/navigation"
-import { DBQUERIES } from "~/queries"
 
-const Container = styled.div`
-	font-family: "Satoshi", sans-serif;
-	margin: 0 auto;
-	padding: 1rem;
-	max-width: 100%;
-
-	@media (min-width: 1024px) {
-		max-width: 1400px;
-		padding: 2rem 1rem;
-	}
-`
-
-const Content = styled.div`
-	display: grid;
-	grid-template-columns: 1fr;
-	gap: 1rem;
-
-	@media (min-width: 1024px) {
-		grid-template-columns: 240px 1fr;
-		gap: 2rem;
-	}
-`
-
-const ProductSection = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-
-	@media (min-width: 1025px) {
-		gap: 2rem;
-	}
-`
-
-const Header = styled.div`
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 0.5rem;
-`
-
-const Title = styled.h1`
-	font-size: 1.5rem;
-	font-weight: 700;
-
-	@media (min-width: 1025px) {
-		font-size: 2rem;
-	}
-`
-
-const SortSelect = styled.select`
-	padding: 0.5rem;
-	border: 1px solid #e5e5e5;
-	border-radius: 4px;
-	min-width: 100%;
-
-	@media (min-width: 1024px) {
-		min-width: 200px;
-	}
-`
-
-const ProductGrid = styled.div`
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(200px, 350px));
-	/* gap: 1rem; */
-	justify-content: space-evenly;
-
-	@media (min-width: 1024px) {
-		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-		gap: 2rem;
-	}
-`
-
-const Pagination = styled.div`
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 0.5rem;
-	margin-top: 1rem;
-
-	@media (min-width: 1025px) {
-		margin-top: 2rem;
-	}
-`
-
-const PageButton = styled.button<{ $active?: boolean }>`
-	font-family: "Satoshi", sans-serif;
-	padding: 0.5rem 0.75rem;
-	border: 1px solid ${(props) => (props.$active ? "#000" : "#e5e5e5")};
-	background: ${(props) => (props.$active ? "#000" : "transparent")};
-	color: ${(props) => (props.$active ? "#fff" : "#000")};
-	border-radius: 4px;
-	cursor: pointer;
-	transition: all 0.2s;
-
-	&:hover {
-		border-color: #000;
-	}
-
-	@media (min-width: 1025px) {
-		padding: 0.5rem 1rem;
-	}
-`
-const ProductsWrapper = styled.div`
-	display: flex;
-	justify-content: center;
-	overflow: auto;
-	white-space: nowrap;
-	column-gap: 1.5rem;
-	margin-top: 1rem;
-`
+interface CategoryPageProps {
+	currentPath: string
+	categories?: Category[]
+	initialProducts?: Product[]
+	categoryFallbackData?: any
+	productsFallbackData?: any
+}
 
 export default function CategoryPage({
 	currentPath,
+	categories = [],
+	initialProducts = [],
 	categoryFallbackData,
 	productsFallbackData
-}: {
-	currentPath: string
-	categoryFallbackData?: object
-	productsFallbackData?: object
-}) {
-	const categories: Category[] =
-		DBQUERIES.getCategories(categoryFallbackData).categories
+}: CategoryPageProps) {
+	const allCategories = useMemo(() => {
+		return categories.length > 0 ? categories : (categoryFallbackData ?? [])
+	}, [categories, categoryFallbackData])
 
-	const categoryProducts: Product[] = DBQUERIES.getProductsByCategory(
-		currentPath,
-		0,
-		0,
-		productsFallbackData
-	).products
-
-	// console.log(categoryProducts)
+	const productsList = useMemo(() => {
+		return initialProducts.length > 0 ? initialProducts : (productsFallbackData?.products ?? [])
+	}, [initialProducts, productsFallbackData])
 
 	const [sort, setSort] = useState("price-low")
 	const [currentPage, setCurrentPage] = useState(1)
 	const itemsPerPage = 9
 
 	const sortedProducts = useMemo(() => {
-		// Filter products by category
-
-		// Sort products
+		const list = [...productsList]
 		switch (sort) {
 			case "price-low":
-				categoryProducts.sort((a: Product, b: Product) => a.price - b.price)
-				break
+				return list.sort((a: Product, b: Product) => a.price - b.price)
 			case "price-high":
-				categoryProducts.sort((a: Product, b: Product) => b.price - a.price)
-				break
+				return list.sort((a: Product, b: Product) => b.price - a.price)
 			case "rating":
-				categoryProducts.sort((a: Product, b: Product) => b.rating - a.rating)
-				break
+				return list.sort((a: Product, b: Product) => b.rating - a.rating)
+			case "reviews":
 			default:
-				// Most Popular (by reviews)
-				categoryProducts.sort(
-					(a: Product, b: Product) => Number(b.reviews) - Number(a.reviews)
+				return list.sort(
+					(a: Product, b: Product) => (b.reviews?.length || 0) - (a.reviews?.length || 0)
 				)
 		}
+	}, [productsList, sort])
 
-		return categoryProducts
-	}, [categoryProducts, sort])
-
-	const totalPages = Math.ceil(sortedProducts.length / itemsPerPage)
+	const totalPages = Math.max(1, Math.ceil(sortedProducts.length / itemsPerPage))
 
 	const currentProducts = sortedProducts.slice(
 		(currentPage - 1) * itemsPerPage,
 		currentPage * itemsPerPage
 	)
 
-	const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setSort(e.target.value)
-	}
+	const currentCategoryName =
+		allCategories.find((c: Category) => c.slug.toLowerCase() === currentPath.toLowerCase())?.name ||
+		currentPath
 
 	return (
-		<Container>
+		<div className="max-w-[1400px] mx-auto px-4 py-8 font-[family-name:var(--font-satoshi)]">
 			<Breadcrumb />
+
+			{/* Mobile category select */}
 			<MobileNav
 				currentCategory={currentPath}
-				categories={categories}
+				categories={allCategories}
 			/>
 
-			<Content>
+			<div className="flex flex-col lg:flex-row gap-8 items-start">
+				{/* Desktop sidebar */}
 				<DesktopNav
 					currentCategory={currentPath}
-					categories={categories}
+					categories={allCategories}
 				/>
-				<ProductSection>
-					<Header>
-						<Title>
-							{categories.find((c) => c.slug === currentPath)!.name}
-						</Title>
-						<SortSelect
-							value={sort}
-							onChange={handleSortChange}
-						>
-							<option value="price-low">Price: Low to High</option>
-							<option value="price-high">Price: High to Low</option>
-							<option value="rating">Rating: High to Low</option>
-							<option value="reviews">Most Popular</option>
-						</SortSelect>
-					</Header>
 
-					<ProductGrid>
-						{currentProducts.map((product: Product) => (
-							<ProductsWrapper key={product.id}>
-								<ProductCard product={product} />
-							</ProductsWrapper>
-						))}
-					</ProductGrid>
-
-					<Pagination>
-						<PageButton
-							onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-							disabled={currentPage === 1}
-						>
-							Previous
-						</PageButton>
-						{[...Array(totalPages)].map((_, i) => (
-							<PageButton
-								key={i + 1}
-								$active={currentPage === i + 1}
-								onClick={() => setCurrentPage(i + 1)}
+				{/* Products Section */}
+				<main className="flex-1 w-full">
+					{/* Header */}
+					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-neutral-100">
+						<h1 className="font-[family-name:var(--font-integral)] text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">
+							{currentCategoryName}
+						</h1>
+						<div className="flex items-center gap-2 text-sm text-neutral-500">
+							<span>Showing {currentProducts.length} of {sortedProducts.length} Products</span>
+							<select
+								value={sort}
+								onChange={(e) => {
+									setSort(e.target.value)
+									setCurrentPage(1)
+								}}
+								className="bg-[#f0f0f0] text-black font-medium py-2 px-3 rounded-full border-none outline-none cursor-pointer text-xs sm:text-sm ml-2"
 							>
-								{i + 1}
-							</PageButton>
-						))}
-						<PageButton
-							onClick={() =>
-								setCurrentPage((p) => Math.min(totalPages, p + 1))
-							}
-							disabled={currentPage === totalPages}
-						>
-							Next
-						</PageButton>
-					</Pagination>
-				</ProductSection>
-			</Content>
-		</Container>
+								<option value="price-low">Price: Low to High</option>
+								<option value="price-high">Price: High to Low</option>
+								<option value="rating">Rating: High to Low</option>
+								<option value="reviews">Most Popular</option>
+							</select>
+						</div>
+					</div>
+
+					{/* Product Grid */}
+					{currentProducts.length === 0 ? (
+						<div className="text-center py-16 text-neutral-500">
+							No products found in this category.
+						</div>
+					) : (
+						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
+							{currentProducts.map((product: Product) => (
+								<ProductCard key={product.id} product={product} />
+							))}
+						</div>
+					)}
+
+					{/* Pagination */}
+					{totalPages > 1 && (
+						<div className="flex items-center justify-between mt-12 pt-6 border-t border-neutral-200">
+							<button
+								onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+								disabled={currentPage === 1}
+								className="py-2 px-4 rounded-lg border border-neutral-300 font-medium text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-neutral-50 transition-colors cursor-pointer"
+							>
+								Previous
+							</button>
+
+							<div className="flex items-center gap-1.5">
+								{[...Array(totalPages)].map((_, i) => (
+									<button
+										key={i + 1}
+										onClick={() => setCurrentPage(i + 1)}
+										className={`w-9 h-9 rounded-lg font-medium text-sm transition-colors cursor-pointer ${
+											currentPage === i + 1
+												? "bg-black text-white"
+												: "text-neutral-600 hover:bg-neutral-100"
+										}`}
+									>
+										{i + 1}
+									</button>
+								))}
+							</div>
+
+							<button
+								onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+								disabled={currentPage === totalPages}
+								className="py-2 px-4 rounded-lg border border-neutral-300 font-medium text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-neutral-50 transition-colors cursor-pointer"
+							>
+								Next
+							</button>
+						</div>
+					)}
+				</main>
+			</div>
+		</div>
 	)
 }

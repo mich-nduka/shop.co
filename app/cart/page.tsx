@@ -1,212 +1,11 @@
 "use client"
 
-import type React from "react"
 import { useState } from "react"
-import styled from "styled-components"
 import Link from "next/link"
-import { Minus, Plus, X } from "lucide-react"
+import { Minus, Plus, Trash2, ArrowRight, Tag } from "lucide-react"
 import Breadcrumb from "~/components/breadcrumb"
 import { type CartItem, useCart } from "~/context/cart-context"
 import CheckoutSuccessModal from "~/components/checkout-success-modal"
-
-const Container = styled.div`
-	max-width: 1400px;
-	margin: 0 auto;
-	padding: 2rem 1rem;
-`
-
-const Title = styled.h1`
-	font-size: 2.5rem;
-	font-weight: 800;
-	margin-bottom: 2rem;
-`
-
-const CartLayout = styled.div`
-	font-family: var(--font-satoshi);
-	display: grid;
-	grid-template-columns: 1fr 400px;
-	gap: 2rem;
-
-	@media (max-width: 1024px) {
-		grid-template-columns: 1fr;
-	}
-`
-
-const CartItems = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-`
-
-const CartItem = styled.div`
-	display: grid;
-	grid-template-columns: auto 1fr auto;
-	gap: 1.5rem;
-	align-items: center;
-	padding: 1.5rem;
-	background: white;
-	border-radius: 8px;
-	border: 1px solid #f0f0f0;
-
-	@media (max-width: 768px) {
-		grid-template-columns: auto 1fr;
-		gap: 1rem;
-	}
-`
-
-const ProductImage = styled.img`
-	width: 100px;
-	height: 100px;
-	object-fit: cover;
-	border-radius: 4px;
-`
-
-const ProductInfo = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-`
-
-const ProductName = styled.h3`
-	font-weight: 600;
-	font-size: 1.125rem;
-`
-
-const Price = styled.span`
-	font-weight: 600;
-	font-size: 1.125rem;
-`
-
-const Controls = styled.div`
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-
-	@media (max-width: 768px) {
-		grid-column: 1 / -1;
-		justify-content: space-between;
-	}
-`
-
-const QuantityControls = styled.div`
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-	padding: 0.5rem;
-	border: 1px solid #f0f0f0;
-	border-radius: 4px;
-`
-
-const ControlButton = styled.button`
-	background: none;
-	border: none;
-	padding: 0;
-	cursor: pointer;
-	color: #666;
-
-	&:hover {
-		color: #000;
-	}
-`
-
-const Quantity = styled.span`
-	min-width: 1.5rem;
-	text-align: center;
-	font-weight: 500;
-`
-
-const RemoveButton = styled.button`
-	background: none;
-	border: none;
-	padding: 0;
-	color: #ff0000;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	font-size: 0.875rem;
-
-	&:hover {
-		opacity: 0.8;
-	}
-`
-
-const OrderSummary = styled.div`
-	padding: 2rem;
-	background: #f9f9f9;
-	border-radius: 8px;
-	position: sticky;
-	top: 2rem;
-`
-
-const SummaryTitle = styled.h2`
-	font-size: 1.5rem;
-	font-weight: 600;
-	margin-bottom: 2rem;
-`
-
-const SummaryRow = styled.div`
-	display: flex;
-	justify-content: space-between;
-	margin-bottom: 1rem;
-
-	&:last-of-type {
-		margin-top: 1.5rem;
-		padding-top: 1.5rem;
-		border-top: 1px solid #e5e5e5;
-		font-size: 1.25rem;
-		font-weight: 600;
-	}
-`
-
-const Label = styled.span`
-	color: #666;
-`
-
-const Value = styled.span<{ $discount?: boolean }>`
-	font-weight: 500;
-	color: ${(props) => (props.$discount ? "#ff0000" : "inherit")};
-`
-
-const CheckoutButton = styled.button`
-	width: 100%;
-	padding: 1rem;
-	background: #000;
-	color: white;
-	border: none;
-	border-radius: 4px;
-	font-size: 1rem;
-	font-weight: 600;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.5rem;
-
-	&:hover {
-		opacity: 0.9;
-	}
-`
-
-const EmptyCart = styled.div`
-	text-align: center;
-	padding: 3rem;
-
-	p {
-		margin-bottom: 1rem;
-		color: #666;
-	}
-
-	a {
-		color: #000;
-		text-decoration: underline;
-		font-weight: 500;
-
-		&:hover {
-			opacity: 0.8;
-		}
-	}
-`
 
 type OrderDetails = {
 	orderNumber: string
@@ -217,9 +16,14 @@ type OrderDetails = {
 	total: number
 }
 
+function generateOrderNumber(): string {
+	return `${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`
+}
+
 export default function CartPage() {
-	const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart } =
-		useCart()
+	const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart()
+	const [promoCode, setPromoCode] = useState("")
+	const [promoApplied, setPromoApplied] = useState(false)
 	const [showSuccessModal, setShowSuccessModal] = useState(false)
 	const [orderDetails, setOrderDetails] = useState<OrderDetails>({
 		orderNumber: "",
@@ -233,149 +37,168 @@ export default function CartPage() {
 	const { subtotal, discount, deliveryFee, total } = getCartTotal()
 
 	const handleCheckout = () => {
-		// Generate a random order number
-		const orderNumber = Math.floor(100000000 + Math.random() * 900000000).toString()
+		const orderNumber = generateOrderNumber()
 
-		// Save order details for the success modal
 		setOrderDetails({
 			orderNumber,
-			items: [...cartItems], // Create a copy of the cart items
+			items: [...cartItems],
 			subtotal,
 			discount,
 			deliveryFee,
 			total
 		})
 
-		// Show success modal
 		setShowSuccessModal(true)
-
-		// Clear the cart
 		clearCart()
 	}
 
 	return (
-		<>
-			<Container>
-				<Breadcrumb />
-				<Title>YOUR CART</Title>
+		<div className="max-w-[1400px] mx-auto px-4 py-8 font-[family-name:var(--font-satoshi)]">
+			<Breadcrumb />
+			<h1 className="font-[family-name:var(--font-integral)] text-2xl sm:text-4xl font-black text-black uppercase tracking-tight mb-8">
+				YOUR CART
+			</h1>
 
-				<CartLayout>
-					<CartItems>
-						{cartItems.length === 0 ? (
-							<EmptyCart>
-								<p>Your cart is empty.</p>
-								<Link href="/shop">Continue Shopping</Link>
-							</EmptyCart>
-						) : (
-							cartItems.map((item) => (
-								<CartItem key={`${item.id}`}>
-									<ProductImage
+			{cartItems.length === 0 ? (
+				<div className="text-center py-20 bg-neutral-50 rounded-2xl border border-neutral-200">
+					<p className="text-neutral-600 text-lg mb-4">Your shopping cart is empty.</p>
+					<Link
+						href="/shop"
+						className="inline-block bg-black text-white py-3 px-8 rounded-full font-medium text-sm hover:bg-neutral-800 transition-colors"
+					>
+						Explore Products
+					</Link>
+				</div>
+			) : (
+				<div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-8 items-start">
+					{/* Cart Items List */}
+					<div className="flex flex-col gap-4 border border-neutral-200 rounded-2xl p-4 sm:p-6 bg-white divide-y divide-neutral-100">
+						{cartItems.map((item) => (
+							<div key={item.id} className="pt-4 first:pt-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+								<div className="flex items-center gap-4">
+									<img
 										src={item.image}
 										alt={item.title}
+										className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl bg-neutral-100 shrink-0"
 									/>
+									<div>
+										<h3 className="font-bold text-base sm:text-lg text-black">{item.title}</h3>
+										<div className="text-sm font-semibold text-black mt-1">
+											${item.price}
+										</div>
+										{item.discount > 0 && (
+											<span className="text-xs text-red-500 font-medium">
+												{Math.round(item.discount)}% off
+											</span>
+										)}
+									</div>
+								</div>
 
-									<ProductInfo>
-										<ProductName>{item.title}</ProductName>
-										<Price>${item.price}</Price>
-									</ProductInfo>
+								<div className="flex items-center justify-between w-full sm:w-auto sm:flex-col sm:items-end gap-3 self-stretch sm:self-center">
+									<button
+										onClick={() => removeFromCart(item.id)}
+										className="text-red-500 hover:text-red-700 transition-colors p-1 cursor-pointer"
+										aria-label={`Remove ${item.title} from cart`}
+									>
+										<Trash2 size={18} />
+									</button>
 
-									<Controls>
-										<QuantityControls>
-											<ControlButton
-												onClick={() =>
-													updateQuantity(
-														item.id,
-														item.quantity - 1
-													)
-												}
-											>
-												<Minus size={16} />
-											</ControlButton>
-											<Quantity>{item.quantity}</Quantity>
-											<ControlButton
-												onClick={() =>
-													updateQuantity(
-														item.id,
-														item.quantity + 1
-													)
-												}
-											>
-												<Plus size={16} />
-											</ControlButton>
-										</QuantityControls>
-
-										<RemoveButton
-											onClick={() => removeFromCart(item.id)}
+									{/* Quantity selector */}
+									<div className="flex items-center bg-[#f0f0f0] rounded-full px-2 py-1 gap-2">
+										<button
+											onClick={() => updateQuantity(item.id, item.quantity - 1)}
+											disabled={item.quantity <= 1}
+											className="p-1 text-black hover:opacity-70 disabled:opacity-30 disabled:cursor-not-allowed"
+											aria-label="Decrease quantity"
 										>
-											<X size={16} />
-											Remove
-										</RemoveButton>
-									</Controls>
-								</CartItem>
-							))
+											<Minus size={16} />
+										</button>
+										<span className="font-semibold text-sm min-w-[20px] text-center">
+											{item.quantity}
+										</span>
+										<button
+											onClick={() => updateQuantity(item.id, item.quantity + 1)}
+											className="p-1 text-black hover:opacity-70"
+											aria-label="Increase quantity"
+										>
+											<Plus size={16} />
+										</button>
+									</div>
+								</div>
+							</div>
+						))}
+					</div>
+
+					{/* Order Summary */}
+					<div className="border border-neutral-200 rounded-2xl p-6 bg-white sticky top-24 shadow-sm flex flex-col gap-4">
+						<h2 className="font-bold text-xl text-black">Order Summary</h2>
+
+						<div className="flex flex-col gap-3 text-sm pt-2">
+							<div className="flex justify-between items-center text-neutral-500">
+								<span>Subtotal</span>
+								<span className="font-bold text-black">${subtotal.toFixed(2)}</span>
+							</div>
+
+							<div className="flex justify-between items-center text-neutral-500">
+								<span>Discount</span>
+								<span className="font-bold text-red-500">-${discount.toFixed(2)}</span>
+							</div>
+
+							<div className="flex justify-between items-center text-neutral-500">
+								<span>Delivery Fee</span>
+								<span className="font-bold text-black">${deliveryFee.toFixed(2)}</span>
+							</div>
+
+							<div className="pt-3 border-t border-neutral-200 flex justify-between items-center text-base sm:text-lg font-bold text-black">
+								<span>Total</span>
+								<span>${total.toFixed(2)}</span>
+							</div>
+						</div>
+
+						{/* Promo Code input */}
+						<div className="flex items-center gap-2 pt-2">
+							<div className="relative flex-1">
+								<Tag size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+								<input
+									type="text"
+									placeholder="Add promo code"
+									value={promoCode}
+									onChange={(e) => setPromoCode(e.target.value)}
+									className="w-full py-2.5 pl-10 pr-3 bg-neutral-100 rounded-full text-sm outline-none focus:bg-neutral-200"
+								/>
+							</div>
+							<button
+								onClick={() => {
+									if (promoCode.trim()) setPromoApplied(true)
+								}}
+								className="py-2.5 px-5 bg-black text-white rounded-full text-sm font-semibold hover:bg-neutral-800 transition-colors cursor-pointer"
+							>
+								Apply
+							</button>
+						</div>
+						{promoApplied && (
+							<div className="text-xs text-emerald-600 font-medium">Promo code applied successfully!</div>
 						)}
-					</CartItems>
 
-					<OrderSummary>
-						<SummaryTitle>Order Summary</SummaryTitle>
-
-						<SummaryRow>
-							<Label>Subtotal</Label>
-							<Value>${subtotal}</Value>
-						</SummaryRow>
-
-						<SummaryRow>
-							<Label>Discount (%)</Label>
-							<Value $discount>-${discount}</Value>
-						</SummaryRow>
-
-						<SummaryRow>
-							<Label>Delivery Fee</Label>
-							<Value>${deliveryFee}</Value>
-						</SummaryRow>
-
-						<SummaryRow>
-							<span>Total</span>
-							<span>${total}</span>
-						</SummaryRow>
-
-						<CheckoutButton
+						{/* Checkout button */}
+						<button
 							onClick={handleCheckout}
-							disabled={cartItems.length === 0}
+							className="w-full py-3.5 px-6 bg-black text-white rounded-full font-semibold text-base flex items-center justify-center gap-2 hover:bg-neutral-800 transition-colors shadow-sm cursor-pointer mt-2"
 						>
 							Go to Checkout
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 16 16"
-								fill="none"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									d="M3.33337 8H12.6667"
-									stroke="currentColor"
-									strokeWidth="1.5"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-								/>
-								<path
-									d="M8.66663 4L12.6666 8L8.66663 12"
-									stroke="currentColor"
-									strokeWidth="1.5"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-								/>
-							</svg>
-						</CheckoutButton>
-					</OrderSummary>
-				</CartLayout>
-			</Container>
+							<ArrowRight size={18} />
+						</button>
+					</div>
+				</div>
+			)}
+
+			{/* Checkout Success Modal */}
 			{showSuccessModal && (
 				<CheckoutSuccessModal
 					onClose={() => setShowSuccessModal(false)}
 					orderDetails={orderDetails}
 				/>
 			)}
-		</>
+		</div>
 	)
 }

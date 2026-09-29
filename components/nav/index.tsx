@@ -1,252 +1,42 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import styled from "styled-components"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { Search, User, ChevronDown, X, Menu, Store, Shirt } from "lucide-react"
+import { Search, User, ChevronDown, X, Menu } from "lucide-react"
 import SearchModal from "./search-modal"
 import CartIcon from "../cart-icon"
+import TopBanner from "./top-banner"
 import { Product } from "~/types"
-import { DBQUERIES } from "~/queries"
 
-const Header = styled.header`
-	position: sticky;
-	top: 0;
-	background: white;
-	z-index: 50;
-	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-`
-
-const Nav = styled.nav`
-	max-width: 1400px;
-	margin: 0 auto;
-	padding: 1rem;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 1rem;
-`
-
-const Logo = styled(Link)`
-	font-size: 1.5rem;
-	font-weight: 900;
-	text-decoration: none;
-	color: inherit;
-	flex-shrink: 0;
-`
-
-const SearchContainer = styled.div`
-	display: none;
-
-	@media (min-width: 769px) {
-		display: block;
-		flex: 2.5;
-		/* max-width: 900px; */
-		margin: 0 1rem;
-	}
-`
-
-const IconWrapper = styled.div`
-	display: revert;
-	@media (min-width: 767px) {
-		display: none;
-	}
-`
-
-const SearchWrapper = styled.div`
-	position: relative;
-`
-
-const SearchInput = styled.input`
-	font-family: var(--font-satoshi);
-	width: 100%;
-	padding: 0.75rem 1rem 0.75rem 2.5rem;
-	border: none;
-	border-radius: 100px;
-	background: #f5f5f5;
-	font-size: 0.875rem;
-
-	&:focus {
-		outline: none;
-		background: #eeeeee;
-	}
-`
-
-const SearchIcon = styled.div`
-	position: absolute;
-	left: 1rem;
-	top: 50%;
-	transform: translateY(-50%);
-	color: #666;
-`
-
-const SearchResults = styled.div`
-	font-family: var(--font-satoshi);
-	position: absolute;
-	top: calc(100% + 0.5rem);
-	left: 0;
-	right: 0;
-	background: white;
-	border-radius: 8px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	max-height: 400px;
-	overflow-y: auto;
-	z-index: 100;
-`
-
-const ResultItem = styled(Link)`
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-	padding: 0.75rem 1rem;
-	text-decoration: none;
-	color: inherit;
-
-	&:hover {
-		background: #f5f5f5;
-	}
-`
-
-const ResultImage = styled.img`
-	width: 40px;
-	height: 40px;
-	object-fit: cover;
-	border-radius: 4px;
-`
-
-const ResultInfo = styled.div`
-	flex: 1;
-`
-
-const ResultName = styled.div`
-	font-weight: 500;
-`
-
-const ResultPrice = styled.div`
-	color: #666;
-	font-size: 0.875rem;
-`
-
-const Actions = styled.div`
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 1rem;
-
-	@media (min-width: 768px) {
-		flex: 1;
-	}
-`
-
-const MobileSearch = styled.button`
-	background: none;
-	border: none;
-	padding: 0.5rem;
-	cursor: pointer;
-	color: #000;
-
-	@media (min-width: 769px) {
-		display: none;
-	}
-`
-
-const IconButton = styled.button`
-	background: none;
-	border: none;
-	padding: 0.5rem;
-	cursor: pointer;
-	color: #000;
-
-	&:hover {
-		opacity: 0.7;
-	}
-`
-const MobileNav = styled.div<{ $isOpen: boolean }>`
-	display: ${(props) => (props.$isOpen ? "block" : "none")};
-	@media (min-width: 768px) {
-		display: none;
-	}
-`
-
-const MobileNavContent = styled.div`
-	padding: 0.5rem;
-	> * + * {
-		margin-top: 0.25rem;
-	}
-`
-
-const MobileNavLink = styled(Link)`
-	display: block;
-	font-family: "Satoshi", "Integral CF", sans-serif;
-	font-size: clamp(1rem, 0.195vw + 0.95rem, 1.125rem);
-	line-height: clamp(1.463rem, -0.058vw + 1.515rem, 1.5rem);
-	padding: 0.75rem;
-	border-radius: 0.375rem;
-	color: black;
-	text-decoration: none;
-	&:hover {
-		background: #f3f4f6;
-	}
-`
-
-const DesktopNav = styled.div`
-	display: none;
-	@media (min-width: 768px) {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 2rem;
-		flex: 1.5;
-	}
-`
-
-const NavLink = styled(Link)`
-	display: flex;
-	/* flex-direction: column; */
-	align-items: center;
-	justify-content: center;
-	column-gap: 0.5rem;
-	font-family: "Satoshi", "Integral CF", sans-serif;
-	font-size: clamp(1rem, 0.195vw + 0.95rem, 1.125rem);
-	line-height: clamp(1.463rem, -0.058vw + 1.515rem, 1.5rem);
-	color: black;
-	text-decoration: none;
-	&:hover {
-		color: #666;
-	}
-`
-
-export default function Navbar({ allProducts }: { allProducts: Product[] }) {
+export default function Navbar({ allProducts = [] }: { allProducts?: Product[] }) {
 	const [showSearch, setShowSearch] = useState(false)
 	const [searchQuery, setSearchQuery] = useState("")
 	const [searchResults, setSearchResults] = useState<Product[]>([])
 	const [showMobileSearch, setShowMobileSearch] = useState(false)
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+	const searchRef = useRef<HTMLDivElement>(null)
 
-	const products = DBQUERIES.getProducts(0, 0, allProducts).products
-
-	// Simulated search function
 	const handleSearch = (query: string) => {
 		setSearchQuery(query)
-
 		if (query.trim() === "") {
 			setSearchResults([])
+			setShowSearch(false)
 			return
 		}
 
-		// Filter mock products based on search query
-		const results = products.filter((product: Product) =>
-			product.title.toLowerCase().includes(query.toLowerCase())
-		)
+		const results = allProducts.filter((product: Product) =>
+			product.title.toLowerCase().includes(query.toLowerCase()) ||
+			product.category?.toLowerCase().includes(query.toLowerCase())
+		).slice(0, 8)
 
 		setSearchResults(results)
+		setShowSearch(true)
 	}
 
 	// Close search results when clicking outside
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
-			const target = event.target as HTMLElement
-			if (!target.closest("[data-search-container]")) {
+			if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
 				setShowSearch(false)
 			}
 		}
@@ -262,7 +52,6 @@ export default function Navbar({ allProducts }: { allProducts: Product[] }) {
 		} else {
 			document.body.style.overflow = ""
 		}
-
 		return () => {
 			document.body.style.overflow = ""
 		}
@@ -270,99 +59,207 @@ export default function Navbar({ allProducts }: { allProducts: Product[] }) {
 
 	return (
 		<>
-			<Header>
-				<Nav>
-					<div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-						{mobileMenuOpen ? (
-							<IconWrapper>
-								<X
-									style={{ marginTop: "0.5rem" }}
-									size={24}
-									onClick={() => setMobileMenuOpen(false)}
-								/>
-							</IconWrapper>
-						) : (
-							<IconWrapper>
-								<Menu
-									style={{ marginTop: "0.5rem" }}
-									size={24}
-									onClick={() => setMobileMenuOpen(true)}
-								/>
-							</IconWrapper>
-						)}
+			<TopBanner />
+			<header className="sticky top-0 bg-white z-40 shadow-sm border-b border-neutral-100">
+				<nav className="max-w-[1400px] mx-auto px-4 py-3 flex items-center justify-between gap-4">
+					<div className="flex items-center gap-3">
+						{/* Mobile Hamburger */}
+						<button
+							onClick={() => setMobileMenuOpen(true)}
+							className="md:hidden p-1 text-black hover:text-neutral-600 transition-colors"
+							aria-label="Open navigation menu"
+						>
+							<Menu size={24} />
+						</button>
 
-						<Logo href="/">SHOP.CO</Logo>
+						{/* Logo */}
+						<Link
+							href="/"
+							className="font-[family-name:var(--font-integral)] text-2xl md:text-3xl font-black tracking-tight text-black no-underline"
+						>
+							SHOP.CO
+						</Link>
 					</div>
 
-					<DesktopNav>
-						<NavLink href="/shop">
-							<Store /> Shop
-						</NavLink>
-
-						<NavLink href="/brands">
-							<Shirt />
+					{/* Desktop Navigation Links */}
+					<div className="hidden md:flex items-center gap-6 font-[family-name:var(--font-satoshi)] text-base font-medium">
+						<Link
+							href="/shop"
+							className="flex items-center gap-1 text-black hover:text-neutral-600 transition-colors"
+						>
+							Shop
+							<ChevronDown size={16} />
+						</Link>
+						<Link
+							href="/shop"
+							className="text-black hover:text-neutral-600 transition-colors"
+						>
+							On Sale
+						</Link>
+						<Link
+							href="/shop"
+							className="text-black hover:text-neutral-600 transition-colors"
+						>
+							New Arrivals
+						</Link>
+						<Link
+							href="/brands"
+							className="text-black hover:text-neutral-600 transition-colors"
+						>
 							Brands
-						</NavLink>
-					</DesktopNav>
+						</Link>
+					</div>
 
-					<SearchContainer data-search-container>
-						<SearchWrapper>
-							<SearchInput
+					{/* Search Box - Desktop */}
+					<div ref={searchRef} className="hidden md:block flex-1 max-w-[550px] relative mx-4 font-[family-name:var(--font-satoshi)]">
+						<div className="relative">
+							<Search
+								size={18}
+								className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+							/>
+							<input
 								type="text"
 								placeholder="Search for products..."
 								value={searchQuery}
 								onChange={(e) => handleSearch(e.target.value)}
-								onFocus={() => setShowSearch(true)}
+								onFocus={() => {
+									if (searchQuery.trim() !== "") setShowSearch(true)
+								}}
+								className="w-full py-2.5 pl-11 pr-4 bg-[#f0f0f0] rounded-full text-sm outline-none focus:bg-[#e8e8e8] transition-colors"
 							/>
-							<SearchIcon>
-								<Search size={16} />
-							</SearchIcon>
+						</div>
 
-							{showSearch && searchResults.length > 0 && (
-								<SearchResults>
-									{searchResults.map((product) => (
-										<ResultItem
-											key={product.id}
-											href={`/shop/${product.category}/${product.id}`}
-										>
-											<ResultImage
-												src={product.images[0]}
-												alt={product.title}
-											/>
-											<ResultInfo>
-												<ResultName>{product.title}</ResultName>
-												<ResultPrice>
-													${product.price}
-												</ResultPrice>
-											</ResultInfo>
-										</ResultItem>
-									))}
-								</SearchResults>
-							)}
-						</SearchWrapper>
-					</SearchContainer>
+						{/* Search Results Dropdown */}
+						{showSearch && searchResults.length > 0 && (
+							<div className="absolute top-[calc(100%+0.5rem)] left-0 right-0 bg-white rounded-xl shadow-xl border border-neutral-100 max-h-[380px] overflow-y-auto z-50 p-2 divide-y divide-neutral-100">
+								{searchResults.map((product) => (
+									<Link
+										key={product.id}
+										href={`/shop/${product.category}/${product.id}`}
+										onClick={() => setShowSearch(false)}
+										className="flex items-center gap-3 p-2.5 hover:bg-neutral-50 rounded-lg transition-colors"
+									>
+										<img
+											src={product.images?.[0] || product.thumbnail || "/placeholder.svg"}
+											alt={product.title}
+											className="w-12 h-12 object-cover rounded bg-neutral-100 shrink-0"
+										/>
+										<div className="flex-1 min-w-0">
+											<div className="text-sm font-medium text-black truncate">{product.title}</div>
+											<div className="text-xs text-neutral-500">${product.price}</div>
+										</div>
+									</Link>
+								))}
+							</div>
+						)}
+					</div>
 
-					<Actions>
-						<MobileSearch onClick={() => setShowMobileSearch(true)}>
-							<Search size={24} />
-						</MobileSearch>
+					{/* Right Actions */}
+					<div className="flex items-center gap-3 md:gap-4">
+						{/* Mobile Search Icon */}
+						<button
+							onClick={() => setShowMobileSearch(true)}
+							className="md:hidden p-1 text-black hover:text-neutral-600 transition-colors"
+							aria-label="Search products"
+						>
+							<Search size={22} />
+						</button>
 
+						{/* Cart */}
 						<CartIcon />
-					</Actions>
-				</Nav>
 
-				<MobileNav $isOpen={mobileMenuOpen}>
-					<MobileNavContent>
-						<MobileNavLink href="/shop">Shop</MobileNavLink>
-						<MobileNavLink href="/brands">Brands</MobileNavLink>
-					</MobileNavContent>
-				</MobileNav>
-			</Header>
+						{/* Profile */}
+						<Link
+							href="/login"
+							className="p-1 text-black hover:text-neutral-600 transition-colors"
+							aria-label="Account Login"
+						>
+							<User size={22} />
+						</Link>
+					</div>
+				</nav>
+			</header>
 
+			{/* Mobile Navigation Drawer */}
+			{mobileMenuOpen && (
+				<div className="fixed inset-0 z-50 md:hidden">
+					<div
+						className="fixed inset-0 bg-black/50 transition-opacity"
+						onClick={() => setMobileMenuOpen(false)}
+						aria-hidden="true"
+					/>
+					<div className="fixed top-0 bottom-0 left-0 w-[280px] bg-white z-50 p-6 flex flex-col justify-between shadow-2xl">
+						<div className="flex flex-col gap-6">
+							<div className="flex items-center justify-between">
+								<span className="font-[family-name:var(--font-integral)] text-xl font-bold">
+									SHOP.CO
+								</span>
+								<button
+									onClick={() => setMobileMenuOpen(false)}
+									className="p-1 text-neutral-500 hover:text-black"
+									aria-label="Close menu"
+								>
+									<X size={24} />
+								</button>
+							</div>
+
+							<div className="flex flex-col gap-4 font-[family-name:var(--font-satoshi)] text-lg font-medium">
+								<Link
+									href="/shop"
+									onClick={() => setMobileMenuOpen(false)}
+									className="py-1 text-black hover:text-neutral-600"
+								>
+									Shop
+								</Link>
+								<Link
+									href="/shop"
+									onClick={() => setMobileMenuOpen(false)}
+									className="py-1 text-black hover:text-neutral-600"
+								>
+									On Sale
+								</Link>
+								<Link
+									href="/shop"
+									onClick={() => setMobileMenuOpen(false)}
+									className="py-1 text-black hover:text-neutral-600"
+								>
+									New Arrivals
+								</Link>
+								<Link
+									href="/brands"
+									onClick={() => setMobileMenuOpen(false)}
+									className="py-1 text-black hover:text-neutral-600"
+								>
+									Brands
+								</Link>
+							</div>
+						</div>
+
+						<div className="pt-6 border-t border-neutral-100 flex flex-col gap-3 font-[family-name:var(--font-satoshi)]">
+							<Link
+								href="/login"
+								onClick={() => setMobileMenuOpen(false)}
+								className="w-full text-center py-2.5 px-4 bg-black text-white rounded-full font-medium text-sm"
+							>
+								Sign In
+							</Link>
+							<Link
+								href="/sign-up"
+								onClick={() => setMobileMenuOpen(false)}
+								className="w-full text-center py-2.5 px-4 border border-neutral-300 text-black rounded-full font-medium text-sm"
+							>
+								Create Account
+							</Link>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Mobile Search Modal */}
 			<SearchModal
 				isOpen={showMobileSearch}
 				onClose={() => setShowMobileSearch(false)}
-				products={products}
+				products={allProducts}
 			/>
 		</>
 	)

@@ -1,75 +1,40 @@
-"use client"
-import styled from "styled-components"
 import Link from "next/link"
 import { Category } from "~/types"
-import { QUERIES } from "~/constants"
-
-const Container = styled.div`
-	font-family: "Satoshi", sans-serif;
-	width: 100%;
-	max-width: 240px;
-
-	@media ${QUERIES.laptopAndUp} {
-		max-width: 200px;
-	}
-`
-
-const Title = styled.h2`
-	font-size: 1.25rem;
-	font-weight: 600;
-	margin-bottom: 1.5rem;
-`
-
-const CategoryList = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-`
-
-const CategoryItem = styled.div`
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 0.75rem 0;
-	border-bottom: 1px solid #f0f0f0;
-`
-
-const CategoryLink = styled(Link)<{ $active?: boolean }>`
-	text-decoration: none;
-	color: ${(props) => (props.$active ? "#000" : "#666")};
-	font-weight: ${(props) => (props.$active ? "600" : "400")};
-	transition: color 0.2s;
-
-	&:hover {
-		color: #000;
-	}
-`
 
 interface CategoriesNavProps {
 	categories: Category[]
-	currentCategory: string
+	currentCategory?: string
 }
 
 export default function CategoriesNav({
-	categories,
-	currentCategory
+	categories = [],
+	currentCategory = ""
 }: CategoriesNavProps) {
 	return (
-		<Container>
-			<Title>Categories</Title>
-			<CategoryList>
-				{categories.map((category) => (
-					<CategoryItem key={category.slug}>
-						<CategoryLink
-							href={`/shop/${category.slug.toLowerCase()}`}
-							$active={currentCategory === category.slug.toLowerCase()}
-							prefetch={true}
+		<div className="w-full font-[family-name:var(--font-satoshi)]">
+			<h2 className="text-lg font-bold text-black mb-4">Categories</h2>
+			<div className="flex flex-col">
+				{categories.map((category) => {
+					const isActive = currentCategory.toLowerCase() === category.slug.toLowerCase()
+					return (
+						<div
+							key={category.slug}
+							className="py-2.5 border-b border-neutral-100 flex items-center justify-between"
 						>
-							{category.name}
-						</CategoryLink>
-					</CategoryItem>
-				))}
-			</CategoryList>
-		</Container>
+							<Link
+								href={`/shop/${category.slug.toLowerCase()}`}
+								className={`text-sm transition-colors capitalize ${
+									isActive
+										? "text-black font-bold"
+										: "text-neutral-500 hover:text-black"
+								}`}
+							>
+								{category.name}
+							</Link>
+						</div>
+					)
+				})}
+			</div>
+		</div>
 	)
 }

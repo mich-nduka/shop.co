@@ -1,147 +1,68 @@
-"use client"
-import styled from "styled-components"
+import Link from "next/link"
 import { Star } from "lucide-react"
 import type { Product } from "~/types"
-import Link from "next/link"
-import { QUERIES } from "~/constants"
-
-const Card = styled(Link)`
-	font-family: "Satoshi", sans-serif;
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-	text-decoration: none;
-	color: inherit;
-	margin: 1rem;
-
-	@media ${QUERIES.tabletAndUp} {
-		width: 18.75rem;
-	}
-`
-
-const ImageContainer = styled.div`
-	width: 250px;
-	height: 250px;
-	border-radius: 1.25rem;
-	position: relative;
-	aspect-ratio: 1;
-	overflow: hidden;
-	background: #f5f5f5;
-
-	img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	@media ${QUERIES.tabletAndUp} {
-		width: 18.75rem;
-		height: 18.75rem;
-	}
-`
-
-const ToolTip = styled.div`
-	display: none;
-	position: absolute;
-	max-width: 300px;
-	white-space: pre-wrap;
-	top: -20px;
-	color: black;
-	z-index: 100;
-	background-color: #ccc;
-`
-
-const ProductNameWrapper = styled.div`
-	position: relative;
-	&:hover ${ToolTip} {
-		display: inline-flex;
-		flex-basis: 200px;
-	}
-`
-const ProductInfo = styled.div`
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-`
-
-const ProductName = styled.h3`
-	font-size: clamp(0.75rem, 0.924vw + 0.511rem, 1.25rem);
-	line-height: clamp(1.125rem, 0.924vw + 0.886rem, 1.625rem);
-	white-space: wrap;
-	font-family: var(--font-satoshi), sans-serif;
-	font-weight: 700;
-	cursor: pointer;
-`
-
-const PriceContainer = styled.div`
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-`
-
-const Price = styled.span`
-	font-weight: 600;
-`
-
-const RatingContainer = styled.div`
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-`
-
-const Stars = styled.div`
-	display: flex;
-	color: #ffb800;
-`
-
-const Reviews = styled.span`
-	color: #666;
-	font-size: 0.875rem;
-`
 
 interface ProductCardProps {
 	product: Product
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+	const discountedPrice = product.discountPercentage > 0
+		? Math.round(product.price * (1 - product.discountPercentage / 100))
+		: null
 
 	return (
-		<Card
-			href={{ pathname: `/shop/${product.category}/${product.id}` }}
-			prefetch={true}
+		<Link
+			href={`/shop/${product.category}/${product.id}`}
+			className="group flex flex-col gap-2 font-[family-name:var(--font-satoshi)] w-[200px] sm:w-[240px] md:w-[280px] shrink-0 no-underline text-inherit"
 		>
-			<ImageContainer>
+			<div className="w-full aspect-square bg-[#f0eeed] rounded-[20px] overflow-hidden relative flex items-center justify-center">
 				<img
-					src={product.images[0] || "/placeholder.svg"}
+					src={product.images?.[0] || product.thumbnail || "/placeholder.svg"}
 					alt={product.title}
+					className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+					loading="lazy"
 				/>
-			</ImageContainer>
-			<ProductInfo>
-				<ProductNameWrapper style={{ position: "relative" }}>
-					<ProductName>{product.title}</ProductName>
-					<ToolTip>{product.title}</ToolTip>
-				</ProductNameWrapper>
-				<PriceContainer>
-					<Price>${product.price}</Price>
-				</PriceContainer>
-				<RatingContainer>
-					<Stars>
+			</div>
+
+			<div className="flex flex-col gap-1 mt-1">
+				<h3
+					className="font-bold text-sm md:text-base text-black truncate"
+					title={product.title}
+				>
+					{product.title}
+				</h3>
+
+				<div className="flex items-center gap-2">
+					<div className="flex text-[#ffb800]">
 						{[...Array(5)].map((_, i) => (
 							<Star
 								key={i}
-								size={16}
-								fill={
+								size={14}
+								className={
 									i < Math.floor(product.rating)
-										? "currentColor"
-										: "none"
+										? "text-[#ffb800] fill-[#ffb800]"
+										: "text-neutral-300"
 								}
 							/>
 						))}
-					</Stars>
-					<Reviews>{product.reviews.length} reviews</Reviews>
-				</RatingContainer>
-			</ProductInfo>
-		</Card>
+					</div>
+					<span className="text-xs text-neutral-500 font-medium">
+						{product.rating}/5
+					</span>
+				</div>
+
+				<div className="flex items-center gap-2 mt-0.5">
+					<span className="text-lg md:text-xl font-bold text-black">
+						${product.price}
+					</span>
+					{discountedPrice && (
+						<span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-semibold">
+							-{Math.round(product.discountPercentage)}%
+						</span>
+					)}
+				</div>
+			</div>
+		</Link>
 	)
 }

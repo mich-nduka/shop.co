@@ -1,67 +1,41 @@
 "use client"
-import styled from "styled-components"
-import type { Product, ProductResponse } from "../types"
-import { useEffect, useState } from "react"
-import { QUERIES } from "~/constants"
+
+import type { Product } from "~/types"
 import ProductCard from "./product-card"
-import { DBQUERIES } from "~/queries"
+import { useProductsByCategory } from "~/queries"
 
-const Container = styled.div`
-	font-family: "Satoshi", sans-serif;
-	display: flex;
-	flex-direction: column;
-	margin-top: 3.125rem;
-
-	@media ${QUERIES.tabletAndUp} {
-		/* margin-bottom: 10.525rem; */
-	}
-`
-
-const Title = styled.h2`
-	font-size: 2rem;
-	font-weight: 700;
-	text-align: center;
-`
-
-const ProductGrid = styled.div`
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-	gap: 1rem;
-
-	@media (min-width: 1024px) {
-		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-	}
-`
-const ProductsWrapper = styled.div`
-	display: flex;
-	justify-content: center;
-	margin-top: 1rem;
-`
+interface RelatedProductsProps {
+	currentCategory: string
+	initialProducts?: Product[]
+	fallbackCategory?: { products?: Product[] }
+}
 
 export default function RelatedProducts({
 	currentCategory,
+	initialProducts,
 	fallbackCategory
-}: {
-	currentCategory: string
-	fallbackCategory?: object
-}) {
-	const relatedProducts = DBQUERIES.getProductsByCategory(
+}: RelatedProductsProps) {
+	const queryResult = useProductsByCategory(
 		currentCategory,
 		0,
 		4,
-		fallbackCategory
-	).products
+		fallbackCategory as any
+	)
+
+	const products = initialProducts ?? queryResult.products
+
+	if (!products || products.length === 0) return null
 
 	return (
-		<Container>
-			<Title>YOU MIGHT ALSO LIKE</Title>
-			<ProductGrid>
-				{relatedProducts.map((product: Product) => (
-					<ProductsWrapper key={product.id}>
-						<ProductCard product={product} />
-					</ProductsWrapper>
+		<div className="flex flex-col mt-16 font-[family-name:var(--font-satoshi)]">
+			<h2 className="font-[family-name:var(--font-integral)] text-2xl sm:text-3xl md:text-4xl font-black text-center text-black mb-8 uppercase tracking-tight">
+				YOU MIGHT ALSO LIKE
+			</h2>
+			<div className="flex justify-center flex-wrap gap-4 md:gap-6">
+				{products.slice(0, 4).map((product: Product) => (
+					<ProductCard key={product.id} product={product} />
 				))}
-			</ProductGrid>
-		</Container>
+			</div>
+		</div>
 	)
 }

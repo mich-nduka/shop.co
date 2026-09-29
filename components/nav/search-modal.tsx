@@ -1,143 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import styled, { keyframes } from "styled-components"
+import { useState, useEffect, useRef, useMemo } from "react"
 import Link from "next/link"
 import { Search, X } from "lucide-react"
 import { Product } from "~/types"
-
-const slideUp = keyframes`
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-`
-
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-`
-
-const Overlay = styled.div<{ $isOpen: boolean }>`
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: rgba(0, 0, 0, 0.5);
-	z-index: 100;
-	display: ${(props) => (props.$isOpen ? "block" : "none")};
-	animation: ${fadeIn} 0.3s ease;
-`
-
-const Modal = styled.div`
-	position: fixed;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	background: white;
-	border-top-left-radius: 20px;
-	border-top-right-radius: 20px;
-	z-index: 101;
-	animation: ${slideUp} 0.3s ease;
-	max-height: 90vh;
-	display: flex;
-	flex-direction: column;
-`
-
-const Header = styled.div`
-	padding: 1rem;
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-	border-bottom: 1px solid #f0f0f0;
-`
-
-const SearchInput = styled.input`
-	font-family: var(--font-satoshi);
-	flex: 1;
-	padding: 0.75rem;
-	border: none;
-	background: #f5f5f5;
-	border-radius: 8px;
-	font-size: 1rem;
-
-	&:focus {
-		outline: none;
-		background: #eeeeee;
-	}
-`
-
-const CloseButton = styled.button`
-	background: none;
-	border: none;
-	padding: 0.5rem;
-	cursor: pointer;
-	color: #666;
-
-	&:hover {
-		color: #000;
-	}
-`
-
-const Results = styled.div`
-	font-family: var(--font-satoshi);
-	flex: 1;
-	overflow-y: auto;
-	padding: 0.5rem;
-	-webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-`
-
-const NoResults = styled.div`
-	text-align: center;
-	padding: 2rem;
-	color: #666;
-`
-
-const ResultItem = styled(Link)`
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-	padding: 1rem;
-	text-decoration: none;
-	color: inherit;
-	border-radius: 8px;
-	margin-bottom: 0.5rem;
-
-	&:hover {
-		background: #f5f5f5;
-	}
-
-	&:active {
-		background: #f0f0f0;
-	}
-`
-
-const ResultImage = styled.img`
-	width: 60px;
-	height: 60px;
-	object-fit: cover;
-	border-radius: 4px;
-`
-
-const ResultInfo = styled.div`
-	flex: 1;
-`
-
-const ResultName = styled.div`
-	font-weight: 500;
-	margin-bottom: 0.25rem;
-`
-
-const ResultPrice = styled.div`
-	color: #666;
-`
 
 interface SearchModalProps {
 	isOpen: boolean
@@ -147,79 +13,84 @@ interface SearchModalProps {
 
 export default function SearchModal({ isOpen, onClose, products }: SearchModalProps) {
 	const [searchQuery, setSearchQuery] = useState("")
-	const [searchResults, setSearchResults] = useState(products)
 	const inputRef = useRef<HTMLInputElement>(null)
 
 	useEffect(() => {
-		if (isOpen && inputRef.current) {
-			inputRef.current.focus()
+		if (isOpen) {
+			inputRef.current?.focus()
 		}
 	}, [isOpen])
 
-	const handleSearch = (query: string) => {
-		setSearchQuery(query)
-
-		if (query.trim() === "") {
-			setSearchResults(products)
-			return
+	const searchResults = useMemo(() => {
+		if (!searchQuery.trim()) {
+			return products
 		}
-
-		const results = products.filter((product) =>
-			product.title.toLowerCase().includes(query.toLowerCase())
+		const q = searchQuery.toLowerCase()
+		return products.filter((product) =>
+			product.title.toLowerCase().includes(q) ||
+			product.category?.toLowerCase().includes(q)
 		)
-
-		setSearchResults(results)
-	}
+	}, [searchQuery, products])
 
 	if (!isOpen) return null
 
 	return (
 		<>
-			<Overlay
-				$isOpen={isOpen}
+			{/* Backdrop */}
+			<div
+				className="fixed inset-0 bg-black/50 z-50 transition-opacity"
 				onClick={onClose}
+				aria-hidden="true"
 			/>
-			<Modal>
-				<Header>
-					<Search
-						size={20}
-						color="#666"
-					/>
-					<SearchInput
+
+			{/* Modal Container */}
+			<div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50 max-h-[90vh] flex flex-col shadow-2xl font-[family-name:var(--font-satoshi)]">
+				<div className="p-4 flex items-center gap-3 border-b border-neutral-100">
+					<Search size={20} className="text-neutral-400 shrink-0" />
+					<input
 						ref={inputRef}
 						type="text"
 						placeholder="Search for products..."
 						value={searchQuery}
-						onChange={(e) => handleSearch(e.target.value)}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						className="flex-1 py-2 px-3 bg-neutral-100 rounded-lg text-base outline-none focus:bg-neutral-200 transition-colors"
 					/>
-					<CloseButton onClick={onClose}>
+					<button
+						onClick={onClose}
+						className="p-2 text-neutral-500 hover:text-black transition-colors"
+						aria-label="Close search"
+					>
 						<X size={24} />
-					</CloseButton>
-				</Header>
+					</button>
+				</div>
 
-				<Results>
+				<div className="flex-1 overflow-y-auto p-4 divide-y divide-neutral-100">
 					{searchResults.length === 0 ? (
-						<NoResults>No products found for "{searchQuery}"</NoResults>
+						<div className="text-center py-8 text-neutral-500">
+							No products found for "{searchQuery}"
+						</div>
 					) : (
-						searchResults.map((product : Product) => (
-							<ResultItem
+						searchResults.map((product) => (
+							<Link
 								key={product.id}
 								href={`/shop/${product.category}/${product.id}`}
 								onClick={onClose}
+								className="flex items-center gap-4 py-3 px-2 rounded-lg hover:bg-neutral-50 transition-colors"
 							>
-								<ResultImage
-									src={product.images[0]}
+								<img
+									src={product.images?.[0] || product.thumbnail || "/placeholder.svg"}
 									alt={product.title}
+									className="w-14 h-14 object-cover rounded bg-neutral-100 shrink-0"
 								/>
-								<ResultInfo>
-									<ResultName>{product.title}</ResultName>
-									<ResultPrice>${product.price}</ResultPrice>
-								</ResultInfo>
-							</ResultItem>
+								<div className="flex-1 min-w-0">
+									<div className="font-medium text-sm truncate text-black">{product.title}</div>
+									<div className="text-neutral-500 text-xs mt-0.5">${product.price}</div>
+								</div>
+							</Link>
 						))
 					)}
-				</Results>
-			</Modal>
+				</div>
+			</div>
 		</>
 	)
 }

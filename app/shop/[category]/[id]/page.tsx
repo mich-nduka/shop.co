@@ -1,6 +1,6 @@
-import dynamic from "next/dynamic"
-
-const ProductPage = dynamic(() => import("./product-page"))
+import { notFound } from "next/navigation"
+import ProductPage from "./product-page"
+import { getProduct, getProductsByCategory } from "~/lib/api"
 
 export default async function Page({
 	params
@@ -9,26 +9,20 @@ export default async function Page({
 }) {
 	const { category, id } = await params
 
-	const product = await fetch(`https://dummyjson.com/products/${id}`, {
-		next: { revalidate: 60 } // Revalidates every 60 seconds
-	})
+	const [product, relatedProductsData] = await Promise.all([
+		getProduct(id),
+		getProductsByCategory(category, { limit: 4 })
+	])
 
-	const productCategory = await fetch(
-		`https://dummyjson.com/products/category/${category}?offset=0&limit=4`,
-		{
-			next: { revalidate: 60 } // Revalidates every 60 seconds
-		}
-	)
-
-	const fallbackProduct = await product.json()
-	const fallbackCategory = await productCategory.json()
+	if (!product) {
+		notFound()
+	}
 
 	return (
 		<ProductPage
 			currentCategory={category}
-			productId={id}
-			fallbackCategory={fallbackCategory}
-			fallbackProduct={fallbackProduct}
+			product={product}
+			relatedProducts={relatedProductsData.products.filter((p) => p.id !== product.id).slice(0, 4)}
 		/>
 	)
 }

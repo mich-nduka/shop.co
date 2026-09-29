@@ -1,146 +1,43 @@
-"use client"
-import styled from "styled-components"
 import Skeleton from "./skeleton"
-
-const Container = styled.div`
-	max-width: 1400px;
-	margin: 0 auto;
-	padding: 2rem 1rem;
-`
-
-const BreadcrumbSkeleton = styled.div`
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	margin-bottom: 2rem;
-`
-
-const Content = styled.div`
-	display: grid;
-	grid-template-columns: 250px 1fr;
-	gap: 2rem;
-
-	@media (max-width: 1024px) {
-		grid-template-columns: 1fr;
-	}
-`
-
-const SidebarSkeleton = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-
-	@media (max-width: 1024px) {
-		display: none;
-	}
-`
-
-const CategoryLink = styled(Skeleton)`
-	height: 24px;
-	width: 80%;
-
-	&:nth-child(even) {
-		width: 60%;
-	}
-`
-
-const ProductSection = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 2rem;
-`
-
-const HeaderSkeleton = styled.div`
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-`
-
-const ProductGrid = styled.div`
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-	gap: 2rem;
-`
-
-const ProductCardSkeleton = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-	padding: 1rem;
-	background: #fff;
-`
-
-const ProductImageSkeleton = styled(Skeleton)`
-	aspect-ratio: 1;
-	border-radius: 4px;
-`
-
-const ProductInfoSkeleton = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 0.75rem;
-`
-
-const RatingSkeleton = styled.div`
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-`
-
-const StarsSkeleton = styled.div`
-	display: flex;
-	gap: 2px;
-`
 
 export default function CategorySkeleton() {
 	return (
-		<Container>
-  <BreadcrumbSkeleton>
-    <Skeleton width={40} height={20} />
-    <Skeleton width={10} height={20} />
-    <Skeleton width={60} height={20} />
-  </BreadcrumbSkeleton>
+		<div className="max-w-[1400px] mx-auto px-4 py-8">
+			{/* Breadcrumb Skeleton */}
+			<div className="flex items-center gap-2 mb-8">
+				<Skeleton width={50} height={16} />
+				<Skeleton width={12} height={16} />
+				<Skeleton width={80} height={16} />
+			</div>
 
-  <Content>
-    <SidebarSkeleton>
-      <div style={{ marginBottom: "1rem" }}>
-        <Skeleton width={100} height={24} />
-      </div>
-      {[...Array(15)].map((_, index) => (
-        <CategoryLink key={index} />
-      ))}
-    </SidebarSkeleton>
+			<div className="flex flex-col lg:flex-row gap-8">
+				{/* Sidebar Skeleton */}
+				<div className="hidden lg:block w-[240px] shrink-0 border border-neutral-200 rounded-2xl p-5 flex flex-col gap-3">
+					<Skeleton width={100} height={24} className="mb-4" />
+					{[...Array(10)].map((_, index) => (
+						<Skeleton key={index} width={index % 2 === 0 ? "80%" : "60%"} height={20} />
+					))}
+				</div>
 
-    <ProductSection>
-      <HeaderSkeleton>
-        <Skeleton width={200} height={32} />
-        <Skeleton width={150} height={40} />
-      </HeaderSkeleton>
+				{/* Products Section Skeleton */}
+				<div className="flex-1 flex flex-col gap-6">
+					<div className="flex items-center justify-between">
+						<Skeleton width={180} height={32} />
+						<Skeleton width={120} height={36} className="rounded-full" />
+					</div>
 
-      <ProductGrid>
-        {[...Array(6)].map((_, index) => (
-          <ProductCardSkeleton key={index}>
-            <ProductImageSkeleton />
-            <ProductInfoSkeleton>
-              <Skeleton width="80%" height={24} />
-              <Skeleton width={80} height={24} />
-              <RatingSkeleton>
-                <StarsSkeleton>
-                  {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} width={16} height={16} />
-                  ))}
-                </StarsSkeleton>
-                <div style={{ marginLeft: "8px" }}>
-                  <Skeleton width={60} height={16} />
-                </div>
-              </RatingSkeleton>
-            </ProductInfoSkeleton>
-          </ProductCardSkeleton>
-        ))}
-      </ProductGrid>
-    </ProductSection>
-  </Content>
-</Container>
-
+					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+						{[...Array(6)].map((_, index) => (
+							<div key={index} className="flex flex-col gap-3">
+								<Skeleton width="100%" height={260} className="rounded-[20px]" />
+								<Skeleton width="80%" height={20} />
+								<Skeleton width="40%" height={16} />
+								<Skeleton width="30%" height={24} />
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+		</div>
 	)
 }

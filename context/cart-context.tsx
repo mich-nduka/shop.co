@@ -1,9 +1,8 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react"
 
-// Define cart item type
 export interface CartItem {
   id: number
   title: string
@@ -13,30 +12,39 @@ export interface CartItem {
   image: string
 }
 
+interface CartTotals {
+  subtotal: number
+  discount: number
+  discountPercentage: number
+  deliveryFee: number
+  total: number
+}
+
 interface CartContextType {
   cartItems: CartItem[]
   addToCart: (item: CartItem) => void
   updateQuantity: (id: number, quantity: number) => void
   removeFromCart: (id: number) => void
   clearCart: () => void
-  getCartTotal: () => {
-    subtotal: number
-    discounts: number
-    discount: number
-    deliveryFee: number
-    total: number
-  }
+  getCartTotal: () => CartTotals
   itemCount: number
 }
 
-// Create context with default values
+const defaultTotals: CartTotals = {
+  subtotal: 0,
+  discount: 0,
+  discountPercentage: 0,
+  deliveryFee: 0,
+  total: 0
+}
+
 const CartContext = createContext<CartContextType>({
   cartItems: [],
   addToCart: () => {},
   updateQuantity: () => {},
   removeFromCart: () => {},
   clearCart: () => {},
-  getCartTotal: () => ({ subtotal: 0, discount: 0, deliveryFee: 0, total: 0, discounts: 0 }),
+  getCartTotal: () => defaultTotals,
   itemCount: 0,
 })
 
@@ -44,86 +52,101 @@ export const useCart = () => useContext(CartContext)
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
-  const [itemCount, setItemCount] = useState(0)
-  const [isInitialized, setIsInitialized] = useState(false)
 
-  // Load cart from localStorage on initial render
+  // Load cart from localStorage after mount
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart")
-    if (storedCart) {
+    const raw = typeof window !== "undefined" ? localStorage.getItem("cart") : null
+    if (raw) {
       try {
-        const parsedCart = JSON.parse(storedCart)
-        setCartItems(parsedCart)
-        setItemCount(parsedCart.reduce((count: number, item: CartItem) => count + item.quantity, 0))
-      } catch (error) {
-        console.error("Failed to parse cart from localStorage:", error)
-        localStorage.removeItem("cart")
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) {
+          // Schedule state update to avoid synchronous render cascade warning
+          queueMicrotask(() => {
+            setCartItems(parsed)
+          })
+        }
+      } catch (err) {
+        console.error("Failed to parse cart storage:", err)
       }
     }
-    setIsInitialized(true)
   }, [])
 
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem("cart", JSON.stringify(cartItems))
-      setItemCount(cartItems.reduce((count, item) => count + item.quantity, 0))
+  // Sync to localStorage on cart change
+  const saveCart = useCallback((items: CartItem[]) => {
+    try {
+      localStorage.setItem("cart", JSON.stringify(items))
+    } catch (err) {
+      console.error("Failed to save cart storage:", err)
     }
-  }, [cartItems, isInitialized])
+  }, [])
 
-  // Add item to cart
-  const addToCart = (item: CartItem) => {
+  const addToCart = useCallback((item: CartItem) => {
     setCartItems((prevItems) => {
-      const existingItemIndex = prevItems.findIndex(
-        (cartItem) => cartItem.id === item.id 
-      )
+      const existingItemIndex = prevItems.findIndex((cartItem) => cartItem.id === item.id)
+      let nextItems: CartItem[]
 
       if (existingItemIndex !== -1) {
-        // Item already exists, update quantity
-        const updatedItems = [...prevItems]
-        updatedItems[existingItemIndex].quantity += item.quantity
-        return updatedItems
+        nextItems = [...prevItems]
+        nextItems[existingItemIndex] = {
+          ...nextItems[existingItemIndex],
+          quantity: nextItems[existingItemIndex].quantity + item.quantity
+        }
       } else {
-        // Add new item
-        return [...prevItems, item]
+        nextItems = [...prevItems, item]
       }
+      saveCart(nextItems)
+      return nextItems
     })
-  }
+  }, [saveCart])
 
-  // Update item quantity
-  const updateQuantity = (id: number, quantity: number) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) => (item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item)),
-    )
-  }
+  const updateQuantity = useCallback((id: number, quantity: number) => {
+    setCartItems((prevItems) => {
+      const nextItems = prevItems.map((item) =>
+        item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item
+      )
+      saveCart(nextItems)
+      return nextItems
+    })
+  }, [saveCart])
 
-  // Remove item from cart
-  const removeFromCart = (id: number) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id))
-  }
+  const removeFromCart = useCallback((id: number) => {
+    setCartItems((prevItems) => {
+      const nextItems = prevItems.filter((item) => item.id !== id)
+      saveCart(nextItems)
+      return nextItems
+    })
+  }, [saveCart])
 
-  // Clear entire cart
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCartItems([])
-  }
+    saveCart([])
+  }, [saveCart])
 
-  // Calculate cart totals
-  const getCartTotal = () => {
-    const subtotal = Math.ceil(cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0))
-    // get the total discount of the cart items
-    const discounts = cartItems.reduce((sum, item) => sum + item.discount, 0) / 100
-    const discount = Math.ceil(subtotal * discounts)
+  const itemCount = useMemo(() => {
+    return cartItems.reduce((count, item) => count + item.quantity, 0)
+  }, [cartItems])
+
+  const getCartTotal = useCallback((): CartTotals => {
+    const rawSubtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const rawDiscount = cartItems.reduce(
+      (sum, item) => sum + item.price * (item.discount / 100) * item.quantity,
+      0
+    )
+    
+    const subtotal = Math.round(rawSubtotal * 100) / 100
+    const discount = Math.round(rawDiscount * 100) / 100
+    const discountPercentage = rawSubtotal > 0 ? Math.round((rawDiscount / rawSubtotal) * 100) : 0
     const deliveryFee = subtotal > 0 ? 15 : 0
-    const total = Math.ceil(subtotal - discount + deliveryFee)
+    const total = Math.max(0, Math.round((subtotal - discount + deliveryFee) * 100) / 100)
 
     return {
       subtotal,
-      discounts,
       discount,
+      discountPercentage,
       deliveryFee,
-      total,
+      total
     }
-  }
+  }, [cartItems])
 
   return (
     <CartContext.Provider
@@ -141,4 +164,3 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </CartContext.Provider>
   )
 }
-

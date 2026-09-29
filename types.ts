@@ -1,7 +1,6 @@
 export interface Category {
   slug: string
   name: string
-  image: string
   url: string
 }
 
@@ -17,7 +16,7 @@ export interface Review {
   date: string
   reviewerName: string
   reviewerEmail: string
-  verified: boolean
+  verified?: boolean
 }
 
 export interface Meta {
@@ -28,58 +27,41 @@ export interface Meta {
 }
 
 export interface Product {
-	id: number
-	title: string
-	description: string
-	category: string
-	price: number
-	discountPercentage: number
-	rating: number
-	stock: number
-	tags: string[]
-	brand: string
-	sku: string
-	weight: number
-	dimensions: Dimensions
-	warrantyInformation: string
-	shippingInformation: string
-	availabilityStatus: string
-	reviews: Review[]
-	returnPolicy: string
-	minimumOrderQuantity: number
-	meta: Meta
-	thumbnail: string
-	images: string[]
+  id: number
+  title: string
+  description: string
+  category: string
+  price: number
+  discountPercentage: number
+  rating: number
+  stock: number
+  tags?: string[]
+  brand?: string
+  sku?: string
+  weight?: number
+  dimensions?: Dimensions
+  warrantyInformation?: string
+  shippingInformation?: string
+  availabilityStatus?: string
+  reviews: Review[]
+  returnPolicy?: string
+  minimumOrderQuantity?: number
+  meta?: Meta
+  thumbnail: string
+  images: string[]
 }
 
-export interface ProductResponse {
-	id: number
-	title: string
-	description: string
-	category: string
-	price: number
-	discountPercentage: number
-	rating: number
-	stock: number
-	tags: string[]
-	brand: string
-	sku: string
-	weight: number
-	dimensions: Dimensions
-	warrantyInformation: string
-	shippingInformation: string
-	availabilityStatus: string
-	reviews: Review[]
-	returnPolicy: string
-	minimumOrderQuantity: number
-	meta: Meta
-	thumbnail: string
-	images: string[]
+export type ProductResponse = Product
+
+export interface ProductsApiResponse {
+  products: Product[]
+  total: number
+  skip: number
+  limit: number
 }
 
 export interface Brand {
-	id: number
-	brand: string
-	thumbnail: string
+  id: number
+  brand: string
+  thumbnail: string
 }
-

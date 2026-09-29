@@ -1,40 +1,20 @@
-import styled from "styled-components";
+import React from "react"
+import { Star } from "lucide-react"
 
 interface RatingStarsProps {
-  rating: number; // Rating value, range from 0 to 5
+  rating: number // Rating value, range from 0 to 5
 }
 
-const RatingStars = ({ rating }: RatingStarsProps) => {
+export default function RatingStars({ rating }: RatingStarsProps) {
   return (
-    <StarsContainer>
+    <div className="flex gap-1 items-center">
       {[...Array(5)].map((_, index) => (
-        <Star key={index} $filled={index < rating} />
+        <Star
+          key={index}
+          size={18}
+          className={index < Math.floor(rating) ? "text-[#ffb800] fill-[#ffb800]" : "text-neutral-300"}
+        />
       ))}
-    </StarsContainer>
-  );
-};
-
-const StarsContainer = styled.div`
-  display: flex;
-  gap: 2px;
-`;
-
-const Star = styled.div<{ $filled: boolean }>`
-  width: 20px;
-  height: 20px;
-  background-color: ${(props) => (props.$filled ? "#ffd700" : "#ccc")};
-  clip-path: polygon(
-    50% 0%,
-    61% 35%,
-    98% 35%,
-    68% 57%,
-    79% 91%,
-    50% 70%,
-    21% 91%,
-    32% 57%,
-    2% 35%,
-    39% 35%
-  );
-`;
-
-export default RatingStars;
+    </div>
+  )
+}

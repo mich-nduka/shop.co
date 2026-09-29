@@ -1,9 +1,7 @@
 import BrandsPage from "./brands-page"
+import { getAllBrands } from "~/lib/api"
 
 export default async function Page() {
-	const allProducts = await fetch("https://dummyjson.com/products/")
-		.then((data) => data.json())
-		.then((data) => data)
-
-	return <BrandsPage  allProducts={allProducts} />
+	const brands = await getAllBrands()
+	return <BrandsPage brands={brands} />
 }

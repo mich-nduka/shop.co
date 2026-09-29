@@ -1,168 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import styled from "styled-components"
-import { Star, Minus, Plus, ShoppingCart } from "lucide-react"
-import type { Product } from "../types"
-import { useRouter } from "next/navigation"
+import { Star, Minus, Plus, ShoppingCart, Check } from "lucide-react"
+import type { Product } from "~/types"
 import { useCart } from "~/context/cart-context"
-
-const Container = styled.div`
-	font-family: "Satoshi", sans-serif;
-	display: flex;
-	flex-direction: column;
-	gap: 1.5rem;
-`
-
-const Title = styled.h1`
-	font-family: "Integral CF", sans-serif;
-	font-size: 2rem;
-	font-weight: 700;
-`
-
-const RatingContainer = styled.div`
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-`
-
-const Stars = styled.div`
-	display: flex;
-	color: #ffb800;
-`
-
-const Reviews = styled.span`
-	color: #666;
-`
-
-const PriceContainer = styled.div`
-	font-weight: 700;
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-`
-
-const Price = styled.span`
-	font-size: 1.5rem;
-	font-weight: 600;
-`
-
-const OriginalPrice = styled.span`
-	font-size: 1.5rem;
-	text-decoration: line-through;
-	color: #666;
-`
-
-const Discount = styled.span`
-	color: #ff3333;
-	font-weight: 600;
-`
-
-const Description = styled.p`
-	color: #666;
-	line-height: 1.6;
-`
-
-const Section = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-`
-
-const SectionTitle = styled.h3`
-	font-weight: 600;
-`
-
-const ColorOptions = styled.div`
-	display: flex;
-	gap: 0.5rem;
-`
-
-const ColorButton = styled.button<{ $color: string; $active: boolean }>`
-	width: 32px;
-	height: 32px;
-	border-radius: 50%;
-	background: ${(props) => props.$color};
-	border: 2px solid ${(props) => (props.$active ? "#000" : "transparent")};
-	cursor: pointer;
-	transition: border-color 0.2s;
-
-	&:hover {
-		border-color: #000;
-	}
-`
-
-const SizeOptions = styled.div`
-	display: flex;
-	gap: 0.5rem;
-`
-
-const SizeButton = styled.button<{ $active: boolean }>`
-	font-family: "Satoshi", sans-serif;
-	padding: 0.5rem 1rem;
-	border: 1px solid ${(props) => (props.$active ? "#000" : "#e5e5e5")};
-	background: ${(props) => (props.$active ? "#000" : "#F0F0F0")};
-	color: ${(props) => (props.$active ? "#fff" : "#000")};
-	border-radius: 3.875rem;
-	cursor: pointer;
-	transition: all 0.2s;
-
-	&:hover {
-		border-color: #000;
-	}
-`
-
-const QuantitySelector = styled.div`
-	background-color: #f0f0f0;
-	display: flex;
-	align-items: center;
-	border-radius: 3.875rem;
-	gap: 1rem;
-`
-
-const QuantityButton = styled.button`
-	width: 40px;
-	height: 40px;
-	border: none;
-	background: transparent;
-	/* border-radius: 4px; */
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	transition: all 0.2s;
-
-	&:hover {
-		border-color: #000;
-	}
-`
-
-const Quantity = styled.span`
-	font-weight: 600;
-	min-width: 40px;
-	text-align: center;
-`
-
-const AddToCartButton = styled.button`
-	/* max-width: 25rem; */
-	width: 100%;
-	padding: 1rem;
-	background: #000;
-	color: #fff;
-	border: none;
-	border-radius: 3.875rem;
-	font-weight: 600;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.5rem;
-	transition: opacity 0.2s;
-
-	&:hover {
-		opacity: 0.9;
-	}
-`
 
 interface ProductInfoProps {
 	product: Product
@@ -170,8 +11,18 @@ interface ProductInfoProps {
 
 export default function ProductInfo({ product }: ProductInfoProps) {
 	const [quantity, setQuantity] = useState(1)
+	const [selectedColor, setSelectedColor] = useState(0)
+	const [selectedSize, setSelectedSize] = useState("Large")
+	const [addedNotification, setAddedNotification] = useState(false)
 
 	const { addToCart } = useCart()
+
+	const colors = ["#4F4631", "#314F4A", "#31344F"]
+	const sizes = ["Small", "Medium", "Large", "X-Large"]
+
+	const discountedPrice = product.discountPercentage > 0
+		? Math.round(product.price * (1 - product.discountPercentage / 100))
+		: null
 
 	const handleAddToCart = () => {
 		addToCart({
@@ -179,63 +30,145 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 			title: product.title,
 			discount: product.discountPercentage,
 			price: product.price,
-			quantity: quantity,
-			image: product.images[0]
+			quantity,
+			image: product.images?.[0] || product.thumbnail || "/placeholder.svg"
 		})
 
-		// Optional: Show confirmation message
-		alert(`Added ${quantity} ${product.title} to cart`)
+		setAddedNotification(true)
+		setTimeout(() => setAddedNotification(false), 2500)
 	}
 
 	return (
-		<Container>
-			<Title>{product.title}</Title>
+		<div className="flex flex-col gap-5 font-[family-name:var(--font-satoshi)]">
+			{/* Product Title */}
+			<h1 className="font-[family-name:var(--font-integral)] text-2xl sm:text-3xl md:text-4xl font-black text-black tracking-tight uppercase">
+				{product.title}
+			</h1>
 
-			<RatingContainer>
-				<Stars>
+			{/* Rating */}
+			<div className="flex items-center gap-3">
+				<div className="flex text-[#ffb800]">
 					{[...Array(5)].map((_, i) => (
 						<Star
 							key={i}
-							size={20}
-							fill={
-								i < Math.floor(product.rating) ? "currentColor" : "none"
+							size={18}
+							className={
+								i < Math.floor(product.rating)
+									? "text-[#ffb800] fill-[#ffb800]"
+									: "text-neutral-300"
 							}
 						/>
 					))}
-				</Stars>
-				<Reviews>
-					{product.rating}/5 ({product.reviews.length} reviews)
-				</Reviews>
-			</RatingContainer>
+				</div>
+				<span className="text-sm text-neutral-600 font-medium">
+					{product.rating}/5{" "}
+					<span className="text-neutral-400">
+						({product.reviews?.length || 0} reviews)
+					</span>
+				</span>
+			</div>
 
-			<PriceContainer>
-				<Price>${product.price}</Price>
-			</PriceContainer>
+			{/* Price */}
+			<div className="flex items-center gap-3">
+				<span className="text-2xl sm:text-3xl font-bold text-black">
+					${product.price}
+				</span>
+				{discountedPrice && (
+					<>
+						<span className="text-xl sm:text-2xl font-bold text-neutral-400 line-through">
+							${Math.round(product.price * 1.25)}
+						</span>
+						<span className="px-3 py-1 rounded-full bg-red-100 text-red-600 font-semibold text-xs sm:text-sm">
+							-{Math.round(product.discountPercentage)}%
+						</span>
+					</>
+				)}
+			</div>
 
-			<Description>{product.description}</Description>
+			{/* Description */}
+			<p className="text-neutral-600 text-sm sm:text-base leading-relaxed border-b border-neutral-200 pb-5">
+				{product.description}
+			</p>
 
-			<Section style={{ flexDirection: "row" }}>
-				<QuantitySelector>
-					<QuantityButton
+			{/* Select Colors */}
+			<div className="flex flex-col gap-2.5 border-b border-neutral-200 pb-5">
+				<span className="text-sm text-neutral-600 font-medium">Select Colors</span>
+				<div className="flex items-center gap-3">
+					{colors.map((color, index) => (
+						<button
+							key={index}
+							onClick={() => setSelectedColor(index)}
+							style={{ backgroundColor: color }}
+							className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+								selectedColor === index ? "ring-2 ring-black ring-offset-2" : ""
+							}`}
+							aria-label={`Color option ${index + 1}`}
+						>
+							{selectedColor === index && <Check size={16} className="text-white" />}
+						</button>
+					))}
+				</div>
+			</div>
+
+			{/* Choose Size */}
+			<div className="flex flex-col gap-2.5 border-b border-neutral-200 pb-5">
+				<span className="text-sm text-neutral-600 font-medium">Choose Size</span>
+				<div className="flex flex-wrap gap-2.5">
+					{sizes.map((size) => (
+						<button
+							key={size}
+							onClick={() => setSelectedSize(size)}
+							className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all cursor-pointer ${
+								selectedSize === size
+									? "bg-black text-white"
+									: "bg-[#f0f0f0] text-neutral-600 hover:bg-[#e8e8e8]"
+							}`}
+						>
+							{size}
+						</button>
+					))}
+				</div>
+			</div>
+
+			{/* Quantity and Add to Cart */}
+			<div className="flex items-center gap-4 pt-2">
+				{/* Quantity pill */}
+				<div className="flex items-center bg-[#f0f0f0] rounded-full px-3 py-2 gap-3">
+					<button
 						onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+						className="p-1 text-black hover:opacity-70 transition-opacity"
 						aria-label="Decrease quantity"
 					>
-						<Minus size={20} />
-					</QuantityButton>
-					<Quantity>{quantity}</Quantity>
-					<QuantityButton
+						<Minus size={18} />
+					</button>
+					<span className="font-semibold text-base min-w-[24px] text-center">
+						{quantity}
+					</span>
+					<button
 						onClick={() => setQuantity((q) => q + 1)}
+						className="p-1 text-black hover:opacity-70 transition-opacity"
 						aria-label="Increase quantity"
 					>
-						<Plus size={20} />
-					</QuantityButton>
-				</QuantitySelector>
-				<AddToCartButton onClick={handleAddToCart}>
+						<Plus size={18} />
+					</button>
+				</div>
+
+				{/* Add to cart */}
+				<button
+					onClick={handleAddToCart}
+					className="flex-1 flex items-center justify-center gap-2 bg-black text-white py-3 px-6 rounded-full font-semibold text-sm sm:text-base hover:bg-neutral-800 transition-colors shadow-sm cursor-pointer"
+				>
 					<ShoppingCart size={20} />
 					Add to Cart
-				</AddToCartButton>
-			</Section>
-		</Container>
+				</button>
+			</div>
+
+			{/* Added notification toast */}
+			{addedNotification && (
+				<div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-sm font-medium flex items-center gap-2 animate-in fade-in duration-200">
+					<Check size={16} /> Added {quantity} item(s) to your cart!
+				</div>
+			)}
+		</div>
 	)
 }
-

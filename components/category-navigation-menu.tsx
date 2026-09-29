@@ -1,54 +1,33 @@
-import styled from "styled-components"
-import { Category, Product } from "~/types"
+"use client"
+
+import React from "react"
+import { useRouter } from "next/navigation"
+import { Category } from "~/types"
 import CategoriesNav from "./categories"
 
-
-const MobileCategories = styled.div`
-	margin-bottom: 1rem;
-	display: block;
-
-	@media (min-width: 1024px) {
-		display: none;
-	}
-`
-
-const MobileCategorySelect = styled.select`
-	width: 100%;
-	padding: 0.75rem;
-	border: 1px solid #e5e5e5;
-	border-radius: 4px;
-	font-size: 1rem;
-`
-
-const DesktopCategories = styled.div`
-	display: none;
-
-	@media (min-width: 1024px) {
-		display: block;
-	}
-`
-
-
 export function MobileNav({
-	currentCategory,
-	categories
+	currentCategory = "",
+	categories = []
 }: {
-	currentCategory: string
-	categories: Category[]
+	currentCategory?: string
+	categories?: Category[]
 }) {
+	const router = useRouter()
+
 	const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const value = e.target.value
 		const url = value ? `/shop/${value.toLowerCase()}` : `/shop`
-
-		window.location.href = url
+		router.push(url)
 	}
+
 	return (
-		<MobileCategories>
-			<MobileCategorySelect
+		<div className="mb-4 block lg:hidden font-[family-name:var(--font-satoshi)]">
+			<select
 				value={currentCategory.toLowerCase()}
 				onChange={handleCategoryChange}
+				className="w-full p-3 border border-neutral-200 rounded-xl text-base bg-white text-black outline-none focus:border-black transition-colors"
 			>
-				<option value="">All {currentCategory}</option>
+				<option value="">All Categories</option>
 				{categories.map((category: Category) => (
 					<option
 						key={category.slug}
@@ -57,24 +36,24 @@ export function MobileNav({
 						{category.name}
 					</option>
 				))}
-			</MobileCategorySelect>
-		</MobileCategories>
+			</select>
+		</div>
 	)
 }
 
 export function DesktopNav({
-	currentCategory,
-	categories
+	currentCategory = "",
+	categories = []
 }: {
-	currentCategory: string
-	categories: Category[]
+	currentCategory?: string
+	categories?: Category[]
 }) {
 	return (
-		<DesktopCategories>
+		<aside className="hidden lg:block w-[240px] shrink-0 border border-neutral-200 rounded-2xl p-5 bg-white h-fit">
 			<CategoriesNav
 				categories={categories}
 				currentCategory={currentCategory}
 			/>
-		</DesktopCategories>
+		</aside>
 	)
 }

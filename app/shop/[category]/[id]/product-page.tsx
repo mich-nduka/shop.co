@@ -1,60 +1,42 @@
-"use client"
-
-import styled from "styled-components"
 import ProductImages from "~/components/product-images"
 import ProductInfo from "~/components/product-info"
 import ProductReviews from "~/components/product-reviews"
 import RelatedProducts from "~/components/related-products"
 import { Product } from "~/types"
 import Breadcrumb from "~/components/breadcrumb"
-import { DBQUERIES } from "~/queries"
 
-const Container = styled.div`
-	max-width: 1200px;
-	margin: 0 auto;
-	padding: 2rem 1rem;
-	background-color: #fff;
-`
-
-const ProductSection = styled.section`
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 4rem;
-	margin-bottom: 4rem;
-
-	@media (max-width: 1024px) {
-		grid-template-columns: 1fr;
-		gap: 2rem;
-	}
-`
+interface ProductPageProps {
+	currentCategory: string
+	product: Product
+	relatedProducts?: Product[]
+	productId?: string
+	fallbackProduct?: any
+	fallbackCategory?: any
+}
 
 export default function ProductPage({
 	currentCategory,
-	productId,
-	fallbackProduct,
-	fallbackCategory
-}: {
-	currentCategory: string
-	productId: string
-	fallbackProduct?: object
-	fallbackCategory?: object
-}) {
-	const product: Product = DBQUERIES.getProduct(productId, fallbackProduct).product
-
+	product,
+	relatedProducts = []
+}: ProductPageProps) {
 	return (
-		<Container>
+		<div className="max-w-[1400px] mx-auto px-4 py-8 font-[family-name:var(--font-satoshi)] bg-white">
 			<Breadcrumb />
 
-			<ProductSection>
+			{/* Main Product Section: Gallery + Info */}
+			<section className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 mb-16 items-start">
 				<ProductImages images={product.images} />
 				<ProductInfo product={product} />
-			</ProductSection>
+			</section>
 
+			{/* Reviews Section */}
 			<ProductReviews reviews={product.reviews} />
+
+			{/* Related Products */}
 			<RelatedProducts
 				currentCategory={currentCategory}
-				fallbackCategory={fallbackCategory}
+				initialProducts={relatedProducts}
 			/>
-		</Container>
+		</div>
 	)
 }

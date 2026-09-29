@@ -1,188 +1,66 @@
-"use client"
-
-import styled from "styled-components"
-import ProductCard from "./product-card"
-import { QUERIES } from "~/constants"
-import Slider from "./review-slides"
-import { Product, ProductResponse } from "~/types"
-import { DBQUERIES } from "~/queries"
 import Link from "next/link"
+import ProductCard from "./product-card"
+import Slider from "./review-slides"
+import { Product } from "~/types"
 
-const MainSectionWrapper = styled.div`
-	padding: 3.125rem 0;
-	@media ${QUERIES.tabletAndUp} {
-		padding: 3.125rem 0;
-		display: flex;
-		flex-direction: column;
-	}
-	background-color: white;
-`
-
-const ProductCardWrapper = styled.div`
-	overflow: auto;
-	margin: 0 auto;
-	@media ${QUERIES.tabletOnly} {
-		margin: 0;
-	}
-`
-
-const MainSectionTitle = styled.h2`
-	font-size: clamp(2rem, 1.848vw + 1.522rem, 3rem);
-	line-height: clamp(3rem, 1.663vw + 2.57rem, 3.9rem);
-	font-weight: 700;
-	text-align: center;
-`
-
-const ProductsWrapper = styled.div`
-	display: flex;
-	overflow: auto;
-	white-space: nowrap;
-	column-gap: 1.5rem;
-`
-
-const ButtonWrapper = styled.div`
-	display: flex;
-	margin: 1.875rem 0;
-`
-const Button = styled.button`
-	font-family: "Satoshi", "Integral CF", sans-serif;
-	font-weight: 500;
-	background-color: transparent;
-	border: 0.0625rem solid #ccc;
-	border-radius: 3.875rem;
-	width: 22.375rem;
-	padding: 0.844rem 0;
-	margin: 0 auto;
-
-	@media ${QUERIES.tabletAndUp} {
-		width: 13.625rem;
-	}
-`
-
-const HorizontalLine = styled.hr`
-	width: 23rem;
-	margin: 4rem auto;
-	@media ${QUERIES.tabletOnly} {
-		width: 46rem;
-	}
-
-	@media ${QUERIES.laptopAndUp} {
-		width: 82rem;
-	}
-`
-
-const CategorySectionWrapper = styled.div`
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	background: #f0f0f0;
-	width: 22.375rem;
-	border-radius: 2.5rem;
-	margin: 4rem auto;
-	padding: 2rem;
-	gap: 4rem;
-
-	@media ${QUERIES.tabletOnly} {
-		width: 43rem;
-		padding: 2rem 4rem;
-	}
-	@media ${QUERIES.laptopAndUp} {
-		width: 90rem;
-		height: 54.125rem;
-	}
-`
-
-const BoxWrapper = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 1.25rem;
-
-	@media ${QUERIES.laptopAndUp} {
-		flex-direction: row;
-		flex-wrap: wrap;
-		& :nth-child(2),
-		:nth-child(3) {
-			flex: 1 1 42.75rem;
-		}
-	}
-`
-
-const Box = styled.div`
-	width: 19.375rem;
-	height: 11.875rem;
-	background: #fff;
-	border-radius: 1.25rem;
-
-	@media ${QUERIES.tabletOnly} {
-		width: 40rem;
-		height: 18.0625rem;
-	}
-
-	@media ${QUERIES.laptopAndUp} {
-		flex: 1 1 25.438rem;
-		height: 18.0625rem;
-	}
-`
-
-export default function MainSection({ fallbackData }: { fallbackData: object }) {
-	const products: ProductResponse[] = DBQUERIES.getProducts(0, 4, fallbackData).products
-
-	return (
-		<MainSectionWrapper>
-			<MainSectionTitle>NEW ARRIVALS</MainSectionTitle>
-			<ProductCardWrapper>
-				<ProductsWrapper>
-					{products.map((product: Product) => (
-						<div key={product.id}>
-							<ProductCard product={product} />
-						</div>
-					))}
-				</ProductsWrapper>
-			</ProductCardWrapper>
-			<ButtonWrapper>
-				<Button>
-					<Link
-						href="/shop"
-						prefetch={true}
-						style={{ textDecoration: "none", color: "inherit" }}
-					>
-						View All
-					</Link>
-				</Button>
-			</ButtonWrapper>
-			<HorizontalLine />
-			<MainSectionTitle>TOP SELLING</MainSectionTitle>
-			<ProductCardWrapper>
-				<ProductsWrapper>
-					{products.map((product: Product) => (
-						<div key={product.id}>
-							<ProductCard product={product} />
-						</div>
-					))}
-				</ProductsWrapper>
-			</ProductCardWrapper>
-			<ButtonWrapper>
-				<Button>
-					<Link
-						href="/shop"
-						prefetch={true}
-						style={{ textDecoration: "none", color: "inherit" }}
-					>
-						View All
-					</Link>
-				</Button>
-			</ButtonWrapper>
-			{/* <CategorySectionWrapper>
-				<MainSectionTitle>BROWSE BY DRESS STYLE</MainSectionTitle>
-				<BoxWrapper>
-					<Box />
-					<Box />
-					<Box />
-					<Box />
-				</BoxWrapper>
-			</CategorySectionWrapper> */}
-			<Slider products={products} />
-		</MainSectionWrapper>
-	)
+interface MainSectionProps {
+	products?: Product[]
+	fallbackData?: { products?: Product[] }
 }
 
+export default function MainSection({ products = [], fallbackData }: MainSectionProps) {
+	const displayProducts = products.length > 0 ? products : fallbackData?.products ?? []
+
+	// Split or duplicate for demo new arrivals and top selling
+	const newArrivals = displayProducts.slice(0, 4)
+	const topSelling = displayProducts.length > 4 ? displayProducts.slice(4, 8) : displayProducts.slice(0, 4)
+
+	return (
+		<div className="py-12 bg-white font-[family-name:var(--font-satoshi)]">
+			{/* NEW ARRIVALS */}
+			<section className="max-w-[1400px] mx-auto px-4">
+				<h2 className="font-[family-name:var(--font-integral)] text-2xl sm:text-4xl md:text-5xl font-black text-center text-black tracking-tight uppercase mb-8">
+					NEW ARRIVALS
+				</h2>
+				<div className="flex overflow-x-auto pb-4 gap-5 justify-start md:justify-center scrollbar-thin">
+					{newArrivals.map((product: Product) => (
+						<ProductCard key={`new-${product.id}`} product={product} />
+					))}
+				</div>
+				<div className="flex justify-center my-8">
+					<Link
+						href="/shop"
+						className="w-full sm:w-[220px] text-center py-3 px-8 rounded-full border border-neutral-300 text-black font-medium text-sm hover:bg-neutral-50 transition-colors"
+					>
+						View All
+					</Link>
+				</div>
+			</section>
+
+			<hr className="max-w-[1240px] mx-auto my-12 border-neutral-200" />
+
+			{/* TOP SELLING */}
+			<section className="max-w-[1400px] mx-auto px-4">
+				<h2 className="font-[family-name:var(--font-integral)] text-2xl sm:text-4xl md:text-5xl font-black text-center text-black tracking-tight uppercase mb-8">
+					TOP SELLING
+				</h2>
+				<div className="flex overflow-x-auto pb-4 gap-5 justify-start md:justify-center scrollbar-thin">
+					{topSelling.map((product: Product) => (
+						<ProductCard key={`top-${product.id}`} product={product} />
+					))}
+				</div>
+				<div className="flex justify-center my-8">
+					<Link
+						href="/shop"
+						className="w-full sm:w-[220px] text-center py-3 px-8 rounded-full border border-neutral-300 text-black font-medium text-sm hover:bg-neutral-50 transition-colors"
+					>
+						View All
+					</Link>
+				</div>
+			</section>
+
+			{/* Testimonial slider */}
+			<Slider products={displayProducts} />
+		</div>
+	)
+}

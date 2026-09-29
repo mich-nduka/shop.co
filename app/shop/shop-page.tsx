@@ -1,90 +1,46 @@
-"use client"
-import styled from "styled-components"
 import Link from "next/link"
 import { Category } from "~/types"
+import Breadcrumb from "~/components/breadcrumb"
 
-const Container = styled.div`
-	max-width: 1200px;
-	margin: 0 auto;
-	padding: 2rem 1rem;
-	margin-bottom: 3rem;
-`
-
-const Title = styled.h1`
-	font-size: 2.5rem;
-	font-weight: 700;
-	text-align: center;
-	margin-bottom: 2rem;
-`
-
-const CategoryGrid = styled.div`
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-	gap: 2rem;
-`
-
-const CategoryCard = styled(Link)`
-	position: relative;
-	aspect-ratio: 1;
-	border-radius: 12px;
-	overflow: hidden;
-	text-decoration: none;
-	color: inherit;
-
-	&:hover img {
-		transform: scale(1.05);
-	}
-`
-
-const CategoryImage = styled.img`
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	transition: transform 0.3s ease;
-`
-
-const CategoryInfo = styled.div`
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	padding: 2rem;
-	background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
-	color: white;
-`
-
-const CategoryName = styled.h2`
-	font-size: 1.5rem;
-	font-weight: 600;
-	margin-bottom: 0.5rem;
-`
+interface ShopPageProps {
+	categories: Category[]
+	thumbnails?: Record<string, string>
+}
 
 export default function ShopPage({
-	categories,
-	thumbnails
-}: {
-	categories: Category[]
-	thumbnails: string[]
-}) {
+	categories = [],
+	thumbnails = {}
+}: ShopPageProps) {
 	return (
-		<Container>
-			<Title>Shop by Category</Title>
-			<CategoryGrid>
-				{categories.map((category: Category, index: number) => (
-					<CategoryCard
-						key={category.name}
-						href={`/shop/${category.slug}`}
-					>
-						<CategoryImage
-							src={thumbnails[index][1]}
-							alt={category.name}
-						/>
-						<CategoryInfo>
-							<CategoryName>{category.name}</CategoryName>
-						</CategoryInfo>
-					</CategoryCard>
-				))}
-			</CategoryGrid>
-		</Container>
+		<div className="max-w-[1400px] mx-auto px-4 py-8 font-[family-name:var(--font-satoshi)]">
+			<Breadcrumb />
+			<h1 className="font-[family-name:var(--font-integral)] text-3xl sm:text-4xl md:text-5xl font-black text-center text-black uppercase tracking-tight mb-10">
+				SHOP BY CATEGORY
+			</h1>
+			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+				{categories.map((category) => {
+					const thumbnail = thumbnails[category.slug] || "/placeholder.svg"
+					return (
+						<Link
+							key={category.slug}
+							href={`/shop/${category.slug.toLowerCase()}`}
+							className="group relative aspect-square rounded-2xl overflow-hidden shadow-sm bg-neutral-100 hover:shadow-md transition-all"
+						>
+							<img
+								src={thumbnail}
+								alt={category.name}
+								className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+								loading="lazy"
+							/>
+							<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-6">
+								<h2 className="text-white text-xl sm:text-2xl font-bold capitalize">
+									{category.name}
+								</h2>
+							</div>
+						</Link>
+					)
+				})}
+			</div>
+		</div>
 	)
 }

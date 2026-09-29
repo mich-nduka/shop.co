@@ -1,62 +1,96 @@
 "use client"
 
-import { cache } from "react"
 import useSWR from "swr"
+import { Category, Product, ProductsApiResponse } from "./types"
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = async (url: string) => {
+	const res = await fetch(url)
+	if (!res.ok) {
+		throw new Error(`Failed to fetch ${url}: ${res.statusText}`)
+	}
+	return res.json()
+}
+
+export function useProduct(id: string | number, fallbackData?: Product) {
+	const { data, error, isLoading } = useSWR<Product>(
+		id ? `https://dummyjson.com/products/${id}` : null,
+		fetcher,
+		{
+			fallbackData,
+			revalidateOnFocus: false,
+			revalidateIfStale: false
+		}
+	)
+	return {
+		product: (data ?? fallbackData) as Product,
+		isLoading,
+		isError: error
+	}
+}
+
+export function useCategories(fallbackData?: Category[]) {
+	const { data, error, isLoading } = useSWR<Category[]>(
+		"https://dummyjson.com/products/categories",
+		fetcher,
+		{
+			fallbackData,
+			revalidateOnFocus: false,
+			revalidateIfStale: false
+		}
+	)
+	return {
+		categories: (data ?? fallbackData ?? []) as Category[],
+		isLoading,
+		isError: error
+	}
+}
+
+export function useProducts(skip = 0, limit = 30, fallbackData?: ProductsApiResponse) {
+	const { data, error, isLoading } = useSWR<ProductsApiResponse>(
+		`https://dummyjson.com/products?skip=${skip}&limit=${limit}`,
+		fetcher,
+		{
+			fallbackData,
+			revalidateOnFocus: false,
+			revalidateIfStale: false
+		}
+	)
+	return {
+		products: data?.products ?? fallbackData?.products ?? [],
+		total: data?.total ?? fallbackData?.total ?? 0,
+		isLoading,
+		isError: error
+	}
+}
+
+export function useProductsByCategory(
+	category: string,
+	skip = 0,
+	limit = 0,
+	fallbackData?: ProductsApiResponse
+) {
+	const { data, error, isLoading } = useSWR<ProductsApiResponse>(
+		category
+			? `https://dummyjson.com/products/category/${encodeURIComponent(category)}?skip=${skip}&limit=${limit}`
+			: null,
+		fetcher,
+		{
+			fallbackData,
+			revalidateOnFocus: false,
+			revalidateIfStale: false
+		}
+	)
+	return {
+		products: data?.products ?? fallbackData?.products ?? [],
+		total: data?.total ?? fallbackData?.total ?? 0,
+		isLoading,
+		isError: error
+	}
+}
 
 export const DBQUERIES = {
-	getProduct: cache(function (id: string, fallbackData?: object) {
-		const { data, error } = useSWR(`https://dummyjson.com/products/${id}`, fetcher, {
-			suspense: true,
-			fallbackData: fallbackData,
-			refreshInterval: 1000
-		})
-		return {
-			product: data,
-			isLoading: !error && !data,
-			isError: error
-		}
-	}),
-	getCategories: cache(function (fallbackData?: object) {
-		const { data, error } = useSWR(
-			"https://dummyjson.com/products/categories",
-			fetcher,
-			{ suspense: true, refreshInterval: 1000, fallbackData: fallbackData }
-		)
-		return {
-			categories: data,
-			isLoading: !error && !data,
-			isError: error
-		}
-	}),
-	getProducts: cache(function (offset: number, limit: number, fallbackData?: object) {
-		const { data, error } = useSWR(
-			`https://dummyjson.com/products?offset=${offset}&limit=${limit}`,
-			fetcher,
-			{ suspense: true, fallbackData: fallbackData, refreshInterval: 1000 }
-		)
-		return {
-			products: data ? data.products : [],
-			isLoading: !error && !data,
-			isError: error
-		}
-	}),
-	getProductsByCategory: cache(function (
-		category: string,
-		offset: number,
-		limit: number,
-		fallbackData?: object
-	) {
-		const { data, error } = useSWR(
-			`https://dummyjson.com/products/category/${category}?offset=${offset}&limit=${limit}`,
-			fetcher,
-			{ suspense: true, refreshInterval: 1000, fallbackData: fallbackData }
-		)
-		return {
-			products: data ? data.products : [],
-			isLoading: !error && !data,
-			isError: error
-		}
-	})
+	getProduct: useProduct,
+	getCategories: useCategories,
+	getProducts: useProducts,
+	getProductsByCategory: useProductsByCategory
 }

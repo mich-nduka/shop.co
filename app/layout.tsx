@@ -1,11 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata } from "next"
 import localFont from "next/font/local"
-import GlobalStyles from "./GlobalStyles"
-import NavigationMenu from "~/components/navigation-menu"
-import StyledComponentsRegistry from "~/lib/registry"
+import "./globals.css"
 import Footer from "~/components/footer"
 import { CartProvider } from "~/context/cart-context"
 import Navbar from "~/components/nav"
+import { getProducts } from "~/lib/api"
 
 export const metadata: Metadata = {
 	title: "Shop.Co",
@@ -50,25 +49,19 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode
 }>) {
-	const allProducts = await fetch("https://dummyjson.com/products/")
-		.then((data) => data.json())
-		.then((data) => data)
+	const productsData = await getProducts({ limit: 100 })
 
 	return (
 		<html
 			lang="en"
 			className={`${integralCF.variable} ${satoshi.variable}`}
 		>
-			<GlobalStyles />
-			<body>
-				<StyledComponentsRegistry>
-					<CartProvider>
-						{/* <NavigationMenu /> */}
-						<Navbar allProducts={allProducts} />
-						{children}
-						<Footer />
-					</CartProvider>
-				</StyledComponentsRegistry>
+			<body className="font-sans antialiased text-black bg-white min-h-screen flex flex-col">
+				<CartProvider>
+					<Navbar allProducts={productsData.products} />
+					<main className="flex-1">{children}</main>
+					<Footer />
+				</CartProvider>
 			</body>
 		</html>
 	)

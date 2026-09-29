@@ -1,77 +1,45 @@
-"use client"
+import React from "react"
 
-import styled from "styled-components"
-import { QUERIES } from "~/constants"
-
-export const BrandStripe = () => {
+export function BrandStripe() {
 	return (
-		<BrandStripeWrapper>
-			<BrandImageWrapper>
-				<BrandImage
+		<div className="bg-black flex justify-center items-center flex-wrap py-11 px-4 -mt-[160px] md:-mt-[2px] lg:mt-0 gap-x-[34px] gap-y-[23px] lg:gap-x-[6.625rem] w-full z-10 relative">
+			<div className="h-[23px] md:h-[33px]">
+				<img
 					src="/versace.png"
 					alt="Versace"
+					className="w-full h-full object-contain"
 				/>
-			</BrandImageWrapper>
-			<BrandImageWrapper>
-				<BrandImage
+			</div>
+			<div className="h-[23px] md:h-[33px]">
+				<img
 					src="/zara.png"
 					alt="Zara"
+					className="w-full h-full object-contain"
 				/>
-			</BrandImageWrapper>
-			<BrandImageWrapper>
-				<BrandImage
+			</div>
+			<div className="h-[23px] md:h-[33px]">
+				<img
 					src="/gucci.png"
 					alt="Gucci"
+					className="w-full h-full object-contain"
 				/>
-			</BrandImageWrapper>
-			<BrandImageWrapper>
-				<BrandImage
+			</div>
+			<div className="h-[23px] md:h-[33px]">
+				<img
 					src="/prada.png"
 					alt="Prada"
+					className="w-full h-full object-contain"
 				/>
-			</BrandImageWrapper>
-			<BrandImageWrapper>
-				<BrandImage
+			</div>
+			<div className="h-[23px] md:h-[33px]">
+				<img
 					src="/calvin-klein.png"
 					alt="Calvin Klein"
+					className="w-full h-full object-contain"
 				/>
-			</BrandImageWrapper>
-		</BrandStripeWrapper>
+			</div>
+		</div>
 	)
 }
 
-
-
-const BrandStripeWrapper = styled.div`
-	background-color: #000;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex-basis: 90rem;
-	flex-wrap: wrap;
-	padding: 2.75rem 0;
-	margin-top: -160px;
-	gap: 23px 34px;
-
-	@media ${QUERIES.tabletOnly} {
-		margin-top: -2px;
-	}
-
-	@media ${QUERIES.laptopAndUp} {
-		column-gap: 6.625rem;
-		margin-top: 0;
-	}
-`
-
-const BrandImageWrapper = styled.div`
-	height: 23px;
-	@media ${QUERIES.tabletAndUp} {
-		height: 33px;
-	}
-`
-
-const BrandImage = styled.img`
-	width: 100%;
-	height: 100%;
-	object-fit: contain;
-`
+export default BrandStripe

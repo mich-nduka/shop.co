@@ -1,239 +1,76 @@
-"use client"
-
 import Link from "next/link"
-import styled from "styled-components"
-import { QUERIES } from "~/constants"
 
 export default function Hero() {
 	return (
-		<HeroMaxWidthWrapper>
-			<HeroTextContent>
-				<MainText>FIND CLOTHES THAT MATCHES YOUR STYLE</MainText>
-				<SubText>
-					Browse through our diverse range of meticulously crafted garments,
-					designed to bring out your individuality and cater to your sense of
-					style.
-				</SubText>
-				<Button>
+		<section className="bg-[#f2f0f1] overflow-hidden">
+			<div className="max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-16 pt-8 md:pt-16 pb-0 flex flex-col md:flex-row items-center justify-between gap-8">
+				{/* Text Content */}
+				<div className="flex-1 max-w-[600px] z-10">
+					<h1 className="font-[family-name:var(--font-integral)] text-3xl sm:text-5xl lg:text-6xl font-black text-black leading-tight tracking-tight uppercase">
+						FIND CLOTHES THAT MATCHES YOUR STYLE
+					</h1>
+					<p className="font-[family-name:var(--font-satoshi)] text-neutral-600 text-sm sm:text-base my-6 leading-relaxed">
+						Browse through our diverse range of meticulously crafted garments,
+						designed to bring out your individuality and cater to your sense of
+						style.
+					</p>
 					<Link
 						href="/shop"
-						prefetch={true}
-						style={{ textDecoration: "none", color: "inherit" }}
+						className="inline-block w-full sm:w-auto text-center bg-black text-white py-3.5 px-12 rounded-full font-medium text-base hover:bg-neutral-800 transition-colors shadow-sm"
 					>
-						SHOP NOW
+						Shop Now
 					</Link>
-				</Button>
-				<StatsComponent />
-			</HeroTextContent>
-			<HeroImageContent>
-				<HeroImage
-					src="/hero-img-2.png"
-					alt="hero image"
-				/>
-				<LgStar
-					src="/lg-star.png"
-					alt="star"
-				/>
-				<SmStar
-					src="/sm-star.png"
-					alt="star"
-				/>
-			</HeroImageContent>
-		</HeroMaxWidthWrapper>
-	)
-}
 
-const HeroMaxWidthWrapper = styled.div`
-	background: #f0f0f0;
-	display: flex;
-	flex-direction: column;
-	padding: 0 1rem;
-	overflow: hidden;
-	margin-bottom: 0;
+					{/* Stats */}
+					<div className="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 mt-10 pt-6 border-t border-neutral-200 sm:border-none font-[family-name:var(--font-satoshi)]">
+						<div className="sm:border-r border-neutral-300 sm:pr-6">
+							<div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black font-[family-name:var(--font-satoshi)]">
+								200+
+							</div>
+							<div className="text-xs sm:text-sm text-neutral-500 mt-1">
+								International Brands
+							</div>
+						</div>
+						<div className="sm:border-r border-neutral-300 sm:pr-6">
+							<div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black font-[family-name:var(--font-satoshi)]">
+								2,000+
+							</div>
+							<div className="text-xs sm:text-sm text-neutral-500 mt-1">
+								High-Quality Products
+							</div>
+						</div>
+						<div className="col-span-2 sm:col-span-1 text-center sm:text-left">
+							<div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black font-[family-name:var(--font-satoshi)]">
+								30,000+
+							</div>
+							<div className="text-xs sm:text-sm text-neutral-500 mt-1">
+								Happy Customers
+							</div>
+						</div>
+					</div>
+				</div>
 
-	@media ${QUERIES.tabletOnly} {
-		padding: 0 2rem;
-		display: block;
-	}
-
-	@media (min-width: 768px) {
-		flex-direction: row;
-		justify-content: center;
-		column-gap: 7.5rem;
-		padding: 0 3rem;
-	}
-`
-
-const HeroTextContent = styled.div`
-	flex: 0 1 38.75rem;
-	padding-top: 1rem;
-	@media (min-width: 768px) {
-		flex: 0 1 39.75rem;
-		padding-top: 6.25rem;
-	}
-`
-
-const MainText = styled.h1`
-	font-family: "Integral CF", sans-serif;
-	font-size: clamp(2.25rem, 2.729vw + 1.544rem, 4rem);
-	line-height: clamp(2.7rem, 5.146vw + 1.368rem, 6rem);
-	font-weight: bold;
-	color: #000;
-	display: contents;
-`
-
-const SubText = styled.p`
-	font-family: "Satoshi", "Integral CF", sans-serif;
-	font-size: clamp(0.875rem, 0.195vw + 0.825rem, 1rem);
-	line-height: clamp(1.05rem, 0.702vw + 0.868rem, 1.5rem);
-	margin: 2rem 0;
-`
-
-const HeroImageContent = styled.div`
-	flex: 0 1 25rem;
-	position: relative;
-	top: -160px;
-	margin: 0 -6.25rem;
-	@media ${QUERIES.tabletOnly} {
-		flex: 0 1 30rem;
-	}
-	@media (min-width: 768px) {
-		flex: 0 1 50rem;
-		top: 0;
-	}
-`
-
-const HeroImage = styled.img`
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-`
-
-const LgStar = styled.img`
-	position: absolute;
-	top: 40px;
-	right: 120px;
-	width: 76px;
-	height: 76px;
-
-	@media ${QUERIES.tabletOnly} {
-		top: 100px;
-		right: 650px;
-		width: 84px;
-		height: 84px;
-	}
-	@media (min-width: 768px) {
-		top: 86px;
-		right: 81px;
-		width: 104px;
-		height: 104px;
-	}
-`
-const SmStar = styled.img`
-	position: absolute;
-	top: 160px;
-	left: 100px;
-	width: 44px;
-	height: 44px;
-
-	@media ${QUERIES.tabletOnly} {
-		top: 140px;
-		left: 150px;
-		width: 54px;
-		height: 54px;
-	}
-
-	@media (min-width: 768px) {
-		right: 750px;
-		top: 300px;
-		width: 64px;
-		height: 64px;
-	}
-`
-
-const Button = styled.button`
-	background-color: #000;
-	min-width: 100%;
-	color: #fff;
-	padding: 1rem 2rem;
-	border-radius: 3.875rem;
-	border: none;
-	@media (min-width: 768px) {
-		min-width: 210px;
-	}
-`
-
-// Stats Component
-const StatsContainer = styled.div`
-	font-family: "Satoshi", "Integral CF", sans-serif;
-	font-weight: 400;
-	display: flex;
-	justify-content: center;
-	flex-wrap: wrap;
-	align-items: center;
-	& > :nth-child(1) {
-		border-right: 1px solid #ccc;
-	}
-	& > :nth-child(2) {
-		padding: 0 8px;
-	}
-	& > :nth-child(3) {
-		margin-top: 1rem;
-	}
-	margin-top: 20px;
-
-	@media (min-width: 768px) {
-		flex-wrap: nowrap;
-		& > *:not(:last-child) {
-			border-right: 1px solid #ccc;
-		}
-		& > :nth-child(3) {
-			margin-top: 0;
-		}
-	}
-`
-
-const StatCard = styled.div`
-	flex: 0 1 50%;
-	align-self: center;
-	justify-self: center;
-	text-align: center;
-	@media (min-width: 768px) {
-		margin: 0 1rem;
-		flex: 1;
-		text-align: left;
-	}
-`
-
-const NumberText = styled.h2`
-	font-size: clamp(1.5rem, 1.559vw + 1.096rem, 2.5rem);
-	line-height: clamp(1.8rem, 3.041vw + 1.013rem, 3.75rem);
-	font-weight: bold;
-	margin: 0;
-`
-
-const StatsSubText = styled.p`
-	font-size: clamp(0.75rem, 0.39vw + 0.649rem, 1rem);
-	line-height: clamp(0.9rem, 0.936vw + 0.658rem, 1.5rem);
-	color: gray;
-	margin: 5px 0 0 0;
-`
-
-const StatsComponent = () => {
-	return (
-		<StatsContainer>
-			<StatCard>
-				<NumberText>200+</NumberText>
-				<StatsSubText>International Brands</StatsSubText>
-			</StatCard>
-			<StatCard>
-				<NumberText>2,000+</NumberText>
-				<StatsSubText>High-Quality Products</StatsSubText>
-			</StatCard>
-			<StatCard>
-				<NumberText>30,000+</NumberText>
-				<StatsSubText>Happy Customers</StatsSubText>
-			</StatCard>
-		</StatsContainer>
+				{/* Image Content with decorative stars */}
+				<div className="flex-1 relative w-full flex justify-center items-end self-end">
+					<img
+						src="/hero-img-2.png"
+						alt="Fashion models showcasing clothes"
+						className="w-full max-w-[550px] object-contain relative z-10"
+					/>
+					<img
+						src="/lg-star.png"
+						alt=""
+						aria-hidden="true"
+						className="absolute top-6 right-6 sm:right-12 w-16 sm:w-24 h-16 sm:h-24 z-20 pointer-events-none"
+					/>
+					<img
+						src="/sm-star.png"
+						alt=""
+						aria-hidden="true"
+						className="absolute top-1/3 left-4 sm:left-8 w-10 sm:w-14 h-10 sm:h-14 z-20 pointer-events-none"
+					/>
+				</div>
+			</div>
+		</section>
 	)
 }

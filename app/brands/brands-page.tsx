@@ -1,245 +1,148 @@
 "use client"
 
-import { useState } from "react"
-import styled from "styled-components"
+import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Search } from "lucide-react"
 import Breadcrumb from "~/components/breadcrumb"
-import { Brand, Product } from "~/types"
-import { DBQUERIES } from "~/queries"
+import { Brand } from "~/types"
 
-const Container = styled.div`
-
-	max-width: 1400px;
-	margin: 0 auto;
-	padding: 2rem 1rem;
-`
-
-const Title = styled.h1`
-	font-size: 2.5rem;
-	font-weight: 800;
-	margin-bottom: 1rem;
-	text-align: center;
-`
-
-const Subtitle = styled.p`
-	font-family: var(--font-satoshi);
-	color: #666;
-	text-align: center;
-	max-width: 600px;
-	margin: 0 auto 3rem;
-`
-
-const SearchContainer = styled.div`
-	max-width: 600px;
-	margin: 0 auto 3rem;
-	position: relative;
-`
-
-const SearchInput = styled.input`
-	font-family: var(--font-satoshi);
-	width: 100%;
-	padding: 1rem 1rem 1rem 3rem;
-	border: 1px solid #e5e5e5;
-	border-radius: 100px;
-	font-size: 1rem;
-
-	&:focus {
-		outline: none;
-		border-color: #000;
+const FEATURED_BRANDS = [
+	{
+		name: "Versace",
+		logo: "/versace.png",
+		description: "Italian luxury fashion company known for bold prints and bright colors."
+	},
+	{
+		name: "Zara",
+		logo: "/zara.png",
+		description: "Spanish fast fashion retailer offering trendy clothing for men and women."
+	},
+	{
+		name: "Gucci",
+		logo: "/gucci.png",
+		description: "Italian high-end luxury fashion and leather goods brand."
+	},
+	{
+		name: "Prada",
+		logo: "/prada.png",
+		description: "Italian luxury fashion house specializing in leather handbags and travel accessories."
+	},
+	{
+		name: "Calvin Klein",
+		logo: "/calvin-klein.png",
+		description: "American fashion house known for minimalist designs and iconic underwear."
 	}
-`
+]
 
-const SearchIcon = styled.div`
-	position: absolute;
-	left: 1rem;
-	top: 50%;
-	transform: translateY(-50%);
-	color: #666;
-`
+interface BrandsPageProps {
+	brands?: Brand[]
+	allProducts?: any
+}
 
-const FeaturedBrands = styled.div`
-	margin-bottom: 4rem;
-`
-
-const SectionTitle = styled.h2`
-	font-size: 1.5rem;
-	font-weight: 700;
-	margin-bottom: 2rem;
-`
-
-const FeaturedGrid = styled.div`
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-	gap: 2rem;
-`
-
-const FeaturedCard = styled.div`
-	font-family: var(--font-satoshi);
-	display: flex;
-	flex-direction: column;
-	text-decoration: none;
-	color: inherit;
-	border-radius: 8px;
-	overflow: hidden;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-	transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-	&:hover {
-		transform: translateY(-5px);
-		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-	}
-`
-
-const FeaturedImage = styled.div`
-	height: 200px;
-	background-color: #f5f5f5;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 2rem;
-
-	img {
-		max-width: 100%;
-		max-height: 100%;
-		object-fit: contain;
-	}
-`
-
-const FeaturedInfo = styled.div`
-	padding: 1.5rem;
-	background: white;
-`
-
-const BrandName = styled.h3`
-	font-size: 1.25rem;
-	font-weight: 600;
-	margin-bottom: 0.5rem;
-`
-
-const AllBrands = styled.div`
-	font-family: var(--font-satoshi);
-	margin-bottom: 4rem;
-`
-
-const BrandsGrid = styled.div`
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-	gap: 2rem;
-`
-
-const BrandCard = styled.div`
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	text-decoration: none;
-	color: inherit;
-	padding: 2rem;
-	border-radius: 8px;
-	background: white;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-	transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-	&:hover {
-		transform: translateY(-5px);
-		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-	}
-`
-
-const BrandLogo = styled.img`
-	max-width: 120px;
-	max-height: 60px;
-	margin-bottom: 1rem;
-	object-fit: contain;
-`
-
-export default function BrandsPage({ allProducts} : {allProducts: Product[]}) {
-
-	const products = DBQUERIES.getProducts(0, 0, allProducts).products
-
-	const allBrands: Brand[] = products
-		.filter((product : Product) =>  product.brand !== undefined)
-		.map((product : Product) => ({
-			id: product.id,
-			brand: product.brand,
-			thumbnail: product.thumbnail
-		}))
-
-
+export default function BrandsPage({ brands = [] }: BrandsPageProps) {
 	const [searchQuery, setSearchQuery] = useState("")
 
-	const filteredBrands = allBrands.filter((brand : Brand) =>
-		brand.brand.toLowerCase().includes(searchQuery.toLowerCase())
-	)
+	const filteredBrands = useMemo(() => {
+		if (!searchQuery.trim()) return brands
+		return brands.filter((brand) =>
+			brand.brand.toLowerCase().includes(searchQuery.toLowerCase())
+		)
+	}, [brands, searchQuery])
 
 	return (
-		<Container>
-			<Title>Our Brands</Title>
-			<Subtitle>
-				Discover our curated selection of premium brands, each offering unique
-				styles and quality products.
-			</Subtitle>
+		<div className="max-w-[1400px] mx-auto px-4 py-8 font-[family-name:var(--font-satoshi)]">
+			<Breadcrumb />
 
-			<SearchContainer>
-				<SearchIcon>
-					<Search size={20} />
-				</SearchIcon>
-				<SearchInput
+			<h1 className="font-[family-name:var(--font-integral)] text-3xl sm:text-4xl md:text-5xl font-black text-center text-black uppercase tracking-tight mb-3">
+				OUR BRANDS
+			</h1>
+			<p className="text-neutral-500 text-center max-w-[600px] mx-auto mb-10 text-sm sm:text-base">
+				Discover top international brands and exclusive designers in our curated catalog.
+			</p>
+
+			{/* Search box */}
+			<div className="max-w-[550px] mx-auto mb-12 relative">
+				<Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+				<input
 					type="text"
 					placeholder="Search brands..."
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
+					className="w-full py-3.5 pl-12 pr-4 bg-neutral-100 rounded-full text-sm outline-none focus:bg-neutral-200 transition-colors border border-transparent focus:border-neutral-300"
 				/>
-			</SearchContainer>
+			</div>
 
-			{searchQuery === "" && (
-				<FeaturedBrands>
-					<SectionTitle>Featured Brands</SectionTitle>
-					<FeaturedGrid>
-						{allBrands.map((brand : Brand) => (
-							<FeaturedCard
-								key={brand.id}
+			{/* Featured Brands */}
+			{!searchQuery && (
+				<section className="mb-14">
+					<h2 className="font-[family-name:var(--font-integral)] text-xl sm:text-2xl font-black text-black uppercase tracking-tight mb-6">
+						FEATURED BRANDS
+					</h2>
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+						{FEATURED_BRANDS.map((brand) => (
+							<div
+								key={brand.name}
+								className="border border-neutral-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 bg-white flex flex-col"
 							>
-								<FeaturedImage>
+								<div className="h-44 bg-[#000] flex items-center justify-center p-6">
 									<img
-										src={brand.thumbnail || "/placeholder.svg"}
-										alt={brand.brand}
+										src={brand.logo}
+										alt={brand.name}
+										className="max-w-[160px] max-h-[50px] object-contain invert"
 									/>
-								</FeaturedImage>
-								<FeaturedInfo>
-									<BrandName>{brand.brand}</BrandName>
-								</FeaturedInfo>
-							</FeaturedCard>
+								</div>
+								<div className="p-5 flex-1 flex flex-col justify-between">
+									<div>
+										<h3 className="font-bold text-lg text-black mb-1">{brand.name}</h3>
+										<p className="text-neutral-500 text-xs sm:text-sm leading-relaxed">
+											{brand.description}
+										</p>
+									</div>
+									<Link
+										href="/shop"
+										className="mt-4 text-xs font-semibold text-black uppercase tracking-wider underline hover:text-neutral-600"
+									>
+										Explore Products &rarr;
+									</Link>
+								</div>
+							</div>
 						))}
-					</FeaturedGrid>
-				</FeaturedBrands>
+					</div>
+				</section>
 			)}
-			{searchQuery !== "" && (
-			<AllBrands>
-				<SectionTitle>
-					{searchQuery ? "Search Results" : "All Brands"}
-				</SectionTitle>
-				<BrandsGrid>
-					{filteredBrands.map((brand : Brand) => (
-						<BrandCard
-							key={brand.id}
-						>
-							<BrandLogo
-								src={brand.thumbnail || "/placeholder.svg"}
-								alt={brand.brand}
-							/>
-							<BrandName>{brand.brand}</BrandName>
-						</BrandCard>
-					))}
-				</BrandsGrid>
 
-			</AllBrands>
-			)}
-				{filteredBrands.length === 0 && (
-					<div style={{ textAlign: "center", padding: "3rem 0" }}>
-						<p>No brands found matching "{searchQuery}"</p>
+			{/* All Brands Grid */}
+			<section className="mb-14">
+				<h2 className="font-[family-name:var(--font-integral)] text-xl sm:text-2xl font-black text-black uppercase tracking-tight mb-6">
+					{searchQuery ? `SEARCH RESULTS (${filteredBrands.length})` : "ALL BRANDS"}
+				</h2>
+
+				{filteredBrands.length === 0 ? (
+					<div className="text-center py-12 text-neutral-500">
+						No brands found matching "{searchQuery}".
+					</div>
+				) : (
+					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+						{filteredBrands.map((brand) => (
+							<div
+								key={brand.id}
+								className="border border-neutral-200 rounded-xl p-4 flex flex-col items-center justify-center text-center bg-white hover:border-black transition-colors group"
+							>
+								<div className="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center mb-3 overflow-hidden">
+									<img
+										src={brand.thumbnail}
+										alt={brand.brand}
+										className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
+									/>
+								</div>
+								<span className="font-semibold text-sm text-black group-hover:underline">
+									{brand.brand}
+								</span>
+							</div>
+						))}
 					</div>
 				)}
-		</Container>
+			</section>
+		</div>
 	)
 }

@@ -1,22 +1,16 @@
 import { BrandStripe } from "~/components/brand-stripe"
 import Hero from "~/components/hero"
-import Loading from "./loading"
-import dynamic from "next/dynamic"
-
-const MainSectionPage = dynamic(() => import("~/components/main-section"), {
-	loading: () => <Loading />
-})
+import MainSection from "~/components/main-section"
+import { getProducts } from "~/lib/api"
 
 export default async function Home() {
-	const res = await fetch("https://dummyjson.com/products?offset=0&limit=4", {
-		next: { revalidate: 60 }
-	})
-	const fallBackProducts = await res.json()
+	const productsData = await getProducts({ limit: 8, skip: 0 })
+
 	return (
 		<>
 			<Hero />
 			<BrandStripe />
-			<MainSectionPage fallbackData={fallBackProducts} />
+			<MainSection products={productsData.products} />
 		</>
 	)
 }

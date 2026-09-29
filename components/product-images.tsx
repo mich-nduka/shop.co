@@ -1,117 +1,49 @@
 "use client"
 
 import { useState } from "react"
-import styled from "styled-components"
-
-const Container = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-
-	@media (min-width: 768px) {
-		display: grid;
-		grid-template-columns: 100px 1fr;
-	}
-`
-
-const Thumbnails = styled.div`
-	display: flex;
-  align-items: center;
-  justify-content: center;
-	gap: 1rem;
-	overflow-x: auto;
-	padding-bottom: 1rem;
-	order: 2;
-
-	@media (min-width: 768px) {
-		flex-direction: column;
-		overflow-x: visible;
-		padding-bottom: 0;
-		order: 1;
-	}
-`
-
-const ThumbnailButton = styled.button<{ $active: boolean }>`
-	flex: 0 0 auto;
-	width: 80px;
-	height: 80px;
-	border: 2px solid ${(props) => (props.$active ? "#000" : "transparent")};
-	padding: 0;
-	cursor: pointer;
-	border-radius: 8px;
-	overflow: hidden;
-	transition: border-color 0.2s;
-
-	&:hover {
-		border-color: #000;
-	}
-
-	img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		display: block;
-	}
-
-	@media (min-width: 768px) {
-		width: 100px;
-		height: 100px;
-	}
-`
-
-const MainImage = styled.div`
-	position: relative;
-	width: 100%;
-	padding-top: 100%; // This creates a 1:1 aspect ratio
-	border-radius: 8px;
-	overflow: hidden;
-	order: 1;
-
-	img {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		display: block;
-	}
-
-	@media (min-width: 768px) {
-		order: 2;
-	}
-`
 
 interface ProductImagesProps {
-	images: string[]
+	images?: string[]
 }
 
-export default function ProductImages({ images }: ProductImagesProps) {
+export default function ProductImages({ images = [] }: ProductImagesProps) {
 	const [activeImage, setActiveImage] = useState(0)
+	const displayImages = images.length > 0 ? images : ["/placeholder.svg"]
 
 	return (
-		<Container>
-			<Thumbnails>
-				{images.map((image, index) => (
-					<ThumbnailButton
+		<div className="flex flex-col-reverse md:grid md:grid-cols-[110px_1fr] gap-4 w-full">
+			{/* Thumbnails */}
+			<div className="flex md:flex-col items-center justify-start gap-3 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 scrollbar-thin">
+				{displayImages.map((image, index) => (
+					<button
 						key={index}
-						$active={activeImage === index}
+						onClick={() => setActiveImage(index)}
 						onMouseEnter={() => setActiveImage(index)}
+						className={`shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden border-2 transition-all cursor-pointer bg-[#f0eeed] ${
+							activeImage === index
+								? "border-black shadow-sm"
+								: "border-transparent hover:border-neutral-300"
+						}`}
+						aria-label={`Select product image ${index + 1}`}
 					>
 						<img
-							src={image || "/placeholder.svg"}
+							src={image}
 							alt={`Product thumbnail ${index + 1}`}
+							className="w-full h-full object-cover"
 							loading="lazy"
 						/>
-					</ThumbnailButton>
+					</button>
 				))}
-			</Thumbnails>
-			<MainImage>
+			</div>
+
+			{/* Main Image */}
+			<div className="w-full aspect-square bg-[#f0eeed] rounded-2xl overflow-hidden relative flex items-center justify-center">
 				<img
-					src={images[activeImage] || "/placeholder.svg"}
-					alt="Product main image"
+					src={displayImages[activeImage] || displayImages[0]}
+					alt="Product image"
+					className="w-full h-full object-cover transition-opacity duration-200"
 				/>
-			</MainImage>
-		</Container>
+			</div>
+		</div>
 	)
 }

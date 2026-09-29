@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --font-integral: var(--font-integral-cf), "Integral CF", sans-serif;
+  --font-satoshi: var(--font-satoshi), "Satoshi", sans-serif;
+
+  --breakpoint-tablet: 550px;
+  --breakpoint-laptop: 1100px;
+  --breakpoint-desktop: 1500px;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-satoshi), "Satoshi", sans-serif;
+    color: #000;
+    background-color: #fff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
