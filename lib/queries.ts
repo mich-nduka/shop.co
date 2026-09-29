@@ -1,7 +1,7 @@
 "use client"
 
 import useSWR from "swr"
-import { Category, Product, ProductsApiResponse } from "./types"
+import { Category, Product, ProductsApiResponse } from "~/types"
 
 const fetcher = async (url: string) => {
 	const res = await fetch(url)

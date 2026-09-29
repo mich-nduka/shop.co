@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Category } from "~/types"
-import Breadcrumb from "~/components/breadcrumb"
+import { Breadcrumb } from "~/components/ui"
 
 interface ShopPageProps {
 	categories: Category[]

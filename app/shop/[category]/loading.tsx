@@ -1,4 +1,4 @@
-import CategorySkeleton from "~/components/category-skeleton"
+import { CategorySkeleton } from "~/components/skeletons"
 
 export default function Loading() {
 	return <CategorySkeleton />

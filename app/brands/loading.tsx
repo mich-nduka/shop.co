@@ -1,4 +1,4 @@
-import Skeleton from "~/components/skeleton"
+import { Skeleton } from "~/components/ui"
 
 export default function BrandsLoading() {
 	return (

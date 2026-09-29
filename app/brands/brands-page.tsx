@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Search } from "lucide-react"
-import Breadcrumb from "~/components/breadcrumb"
+import { Breadcrumb } from "~/components/ui"
 import { Brand } from "~/types"
 
 const FEATURED_BRANDS = [

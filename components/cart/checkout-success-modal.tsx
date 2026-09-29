@@ -2,7 +2,7 @@
 
 import { X, CheckCircle, ShoppingBag } from "lucide-react"
 import Link from "next/link"
-import type { CartItem } from "../context/cart-context"
+import type { CartItem } from "~/context/cart-context"
 
 interface CheckoutSuccessModalProps {
   onClose: () => void

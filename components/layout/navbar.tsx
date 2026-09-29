@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { Search, User, ChevronDown, X, Menu } from "lucide-react"
 import SearchModal from "./search-modal"
-import CartIcon from "../cart-icon"
+import CartIcon from "./cart-icon"
 import TopBanner from "./top-banner"
 import { Product } from "~/types"
 

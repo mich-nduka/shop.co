@@ -1,9 +1,11 @@
-import ProductImages from "~/components/product-images"
-import ProductInfo from "~/components/product-info"
-import ProductReviews from "~/components/product-reviews"
-import RelatedProducts from "~/components/related-products"
+import {
+	ProductImages,
+	ProductInfo,
+	ProductReviews,
+	RelatedProducts
+} from "~/components/product"
+import { Breadcrumb } from "~/components/ui"
 import { Product } from "~/types"
-import Breadcrumb from "~/components/breadcrumb"
 
 interface ProductPageProps {
 	currentCategory: string

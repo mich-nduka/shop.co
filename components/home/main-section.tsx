@@ -1,5 +1,5 @@
 import Link from "next/link"
-import ProductCard from "./product-card"
+import { ProductCard } from "~/components/product"
 import Slider from "./review-slides"
 import { Product } from "~/types"
 

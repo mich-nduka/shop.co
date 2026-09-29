@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import Link from "next/link"
 import { Eye, EyeOff, Check } from "lucide-react"
-import Breadcrumb from "~/components/breadcrumb"
+import { Breadcrumb } from "~/components/ui"
 
 export default function SignupPage() {
 	const [showPassword, setShowPassword] = useState(false)

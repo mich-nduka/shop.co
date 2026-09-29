@@ -1,0 +1,5 @@
+export { default as Navbar } from "./navbar"
+export { default as Footer } from "./footer"
+export { default as CartIcon } from "./cart-icon"
+export { default as TopBanner } from "./top-banner"
+export { default as SearchModal } from "./search-modal"

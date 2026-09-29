@@ -1,4 +1,4 @@
-import Skeleton from "./skeleton"
+import { Skeleton } from "~/components/ui"
 
 export default function ProductSkeleton() {
 	return (

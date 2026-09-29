@@ -2,7 +2,7 @@
 
 import type { Product } from "~/types"
 import ProductCard from "./product-card"
-import { useProductsByCategory } from "~/queries"
+import { useProductsByCategory } from "~/lib/queries"
 
 interface RelatedProductsProps {
 	currentCategory: string

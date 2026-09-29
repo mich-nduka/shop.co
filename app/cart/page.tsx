@@ -3,9 +3,9 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Minus, Plus, Trash2, ArrowRight, Tag } from "lucide-react"
-import Breadcrumb from "~/components/breadcrumb"
+import { Breadcrumb } from "~/components/ui"
 import { type CartItem, useCart } from "~/context/cart-context"
-import CheckoutSuccessModal from "~/components/checkout-success-modal"
+import { CheckoutSuccessModal } from "~/components/cart"
 
 type OrderDetails = {
 	orderNumber: string

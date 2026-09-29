@@ -1,0 +1,5 @@
+export { default as ProductCard } from "./product-card"
+export { default as ProductImages } from "./product-images"
+export { default as ProductInfo } from "./product-info"
+export { default as ProductReviews } from "./product-reviews"
+export { default as RelatedProducts } from "./related-products"

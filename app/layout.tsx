@@ -1,9 +1,8 @@
 import type { Metadata } from "next"
 import localFont from "next/font/local"
 import "./globals.css"
-import Footer from "~/components/footer"
+import { Navbar, Footer } from "~/components/layout"
 import { CartProvider } from "~/context/cart-context"
-import Navbar from "~/components/nav"
 import { getProducts } from "~/lib/api"
 
 export const metadata: Metadata = {

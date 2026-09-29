@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from "react"
 import { Category, Product } from "~/types"
-import ProductCard from "~/components/product-card"
-import Breadcrumb from "~/components/breadcrumb"
-import { DesktopNav, MobileNav } from "~/components/category-navigation-menu"
+import { ProductCard } from "~/components/product"
+import { Breadcrumb } from "~/components/ui"
+import { DesktopNav, MobileNav } from "~/components/category"
 
 interface CategoryPageProps {
 	currentPath: string
