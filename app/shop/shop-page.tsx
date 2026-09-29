@@ -24,6 +24,7 @@ export default function ShopPage({
 						<Link
 							key={category.slug}
 							href={`/shop/${category.slug.toLowerCase()}`}
+							prefetch={false}
 							className="group relative aspect-square rounded-2xl overflow-hidden shadow-sm bg-neutral-100 hover:shadow-md transition-all"
 						>
 							<img

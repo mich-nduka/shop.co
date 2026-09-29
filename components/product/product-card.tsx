@@ -14,6 +14,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 	return (
 		<Link
 			href={`/shop/${product.category}/${product.id}`}
+			prefetch={false}
 			className="group flex flex-col gap-2 font-[family-name:var(--font-satoshi)] w-[200px] sm:w-[240px] md:w-[280px] shrink-0 no-underline text-inherit"
 		>
 			<div className="w-full aspect-square bg-[#f0eeed] rounded-[20px] overflow-hidden relative flex items-center justify-center">

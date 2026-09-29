@@ -23,6 +23,7 @@ export default function CategoriesNav({
 						>
 							<Link
 								href={`/shop/${category.slug.toLowerCase()}`}
+								prefetch={false}
 								className={`text-sm transition-colors capitalize ${
 									isActive
 										? "text-black font-bold"
